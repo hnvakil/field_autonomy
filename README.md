@@ -23,3 +23,6 @@ Outline a rough timeline for the major milestones of your project. This will mai
 What do you view as the biggest risks to you being successful on this project?
 * System integration - there are so many pieces that we have to juggle that if one of them fails we will likely struggle a lot.
 
+Given each of your YOGAs, in what ways is this project well-aligned with these goals, and in what ways is it misaligned? If there are ways in which it is not well-aligned, please provide a potential strategy for bringing the project and your learning goals into better alignment. There should be an individual section for each person on the team addressing the fit between the YOGA and the project topic.
+
+* Kate: This project has a lot of potential to align with my goals. To some extent I will need to understand how the whole system works but I hope to figure out how to abstract out what I need to know about each component. The system is definitely not already prescribed in how we design it so this well aligns with my goals. My only concern is finishing the project, but I feel like that's something we are going to put a lot of attention to so that is okay.
