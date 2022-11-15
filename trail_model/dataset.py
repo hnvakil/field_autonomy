@@ -1,8 +1,9 @@
 import os
 import pandas as pd
 import torch
-from torchvision.io import read_image
 import torchvision.transforms as T
+from PIL import Image
+
 
 
 class TrailDataset(torch.utils.data.Dataset):
@@ -16,7 +17,7 @@ class TrailDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         img_path = self.img_labels.iloc[idx, 0]
-        image = read_image(img_path)
+        image = Image.open(img_path)
         transform = T.Resize((101,101))
         image = transform(image)
         label = self.img_labels.iloc[idx, 1]
