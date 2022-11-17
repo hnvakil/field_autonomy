@@ -1,6 +1,8 @@
 import rclpy
 from rclpy.node import Node
 from .handle_udp import extractUDP
+from std_msgs.msg import String
+from geometry_msgs.msg import PoseStamped
 
 class PoseServerNode(Node):
     def __init__(self):
@@ -10,11 +12,16 @@ class PoseServerNode(Node):
 
         self.pose_data = None
 
+        self.pose_pub = self.create_publisher(String, 'camera_pose', 10)
+
         self.create_timer(0.1, self.get_data())
-    
+
     def get_data(self):
         self.pose_data = extractUDP(udp_port=self.port)
         print(self.pose_data)
+        msg = String()
+        msg.data = str(self.pose_data)
+        self.pose_pub.publish(msg)
 
 def main():
     rclpy.init()
