@@ -9,7 +9,7 @@ def generate_launch_description():
             executable='pose_server',
             name='pose',
             parameters=[
-                {'port': 9999}
+                {'port': 35601}
             ]
         )
     ])
