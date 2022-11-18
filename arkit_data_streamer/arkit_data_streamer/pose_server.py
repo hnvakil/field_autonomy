@@ -1,19 +1,17 @@
 import rclpy
 import numpy as np
-import PyKDL
 from rclpy.node import Node
 from rclpy.time import Time
 from .handle_udp import extractUDP
-from .helper_functions import TFHelper
-from std_msgs.msg import String
+from .helper_functions import TFHelper, convert_matrix_to_frame
+from std_msgs.msg import Float64
 from geometry_msgs.msg import PoseStamped
 
 class PoseServerNode(Node):
     def __init__(self):
-        super().__init__('iOS_pose')
+        super().__init__('pose_server')
         self.declare_parameter('port')
         self.port = self.get_parameter('port').value
-        # self.port = 35601
 
         self.pose_data = None
         self.pose_vals = None
@@ -27,7 +25,8 @@ class PoseServerNode(Node):
         self.ios_clock_offset = -1.0
         self.last_timestamp = self.get_clock().now()
 
-        self.pose_pub = self.create_publisher(PoseStamped, 'device_pose', 10)
+        self.pose_pub = self.create_publisher(PoseStamped, '/device_pose', 10)
+        self.clock_pub = self.create_publisher(Float64, '/ios_clock', 10)
 
         self.create_timer(0.1, self.run)
 
@@ -51,6 +50,8 @@ class PoseServerNode(Node):
             self.ios_clock_valid = True
         corrected_time = self.ios_clock_offset + float(self.ios_timestamp)
         self.msg.header.stamp = Time(seconds=corrected_time).to_msg()
+        clock_offset = Float64(data=self.ios_clock_offset)
+        self.clock_pub.publish(clock_offset)
     
     def process_pose(self):
         self.pose_vals = [float(val) for val in self.pose_vals[:16]]
@@ -64,15 +65,13 @@ class PoseServerNode(Node):
         camera_transform = camera_transform.A
 
         #Get the position and orientation from the transformed matrix.
-        trans = (camera_transform[0,3], camera_transform[1,3], camera_transform[2,3])
-        rot = PyKDL.Rotation(camera_transform[0,0], camera_transform[0,1], camera_transform[0,2],
-                             camera_transform[1,0], camera_transform[1,1], camera_transform[1,2],
-                             camera_transform[2,0], camera_transform[2,1], camera_transform[2,2])
-        quat = rot.GetQuaternion()
+        device_frame = convert_matrix_to_frame(camera_transform)
+        trans = device_frame.p
+        quat = device_frame.M.GetQuaternion()
 
-        self.msg.pose.position.x = trans[0]
-        self.msg.pose.position.y = trans[1]
-        self.msg.pose.position.z = trans[2]
+        self.msg.pose.position.x = trans.x()
+        self.msg.pose.position.y = trans.y()
+        self.msg.pose.position.z = trans.z()
 
         self.msg.pose.orientation.x = quat[0]
         self.msg.pose.orientation.y = quat[1]
