@@ -11,5 +11,14 @@ def generate_launch_description():
             parameters=[
                 {'port': 35601}
             ]
-        )
+        ),
+        Node(
+            package='arkit_data_streamer',
+            namespace='image_server',
+            executable='image_server',
+            name='image',
+            parameters=[
+                {'port': 35602}
+            ]
+        )        
     ])
