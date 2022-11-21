@@ -14,9 +14,9 @@ from cv_bridge import CvBridge, CvBridgeError
 class ImageServerNode(Node):
     def __init__(self):
         super().__init__('image_server')
-        # self.declare_parameter('port')
-        # self.port = self.get_parameter('port').value
-        self.port = 35602
+        self.declare_parameter('port')
+        self.port = self.get_parameter('port').value
+        # self.port = 35602
 
         self.ios_clock_offset = 0
 
