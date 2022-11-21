@@ -12,6 +12,7 @@ class PoseServerNode(Node):
         super().__init__('pose_server')
         self.declare_parameter('port')
         self.port = self.get_parameter('port').value
+        # self.port = 35601
 
         self.pose_data = None
         self.pose_vals = None
@@ -46,7 +47,7 @@ class PoseServerNode(Node):
         self.ios_timestamp = self.pose_vals[16]
         ros_timestamp = self.get_clock().now()
         if not self.ios_clock_valid:
-            self.ios_clock_offset = ros_timestamp.nanoseconds/10e9 - float(self.ios_timestamp)
+            self.ios_clock_offset = ros_timestamp.nanoseconds/1e9 - float(self.ios_timestamp)
             self.ios_clock_valid = True
         corrected_time = self.ios_clock_offset + float(self.ios_timestamp)
         self.msg.header.stamp = Time(seconds=corrected_time).to_msg()

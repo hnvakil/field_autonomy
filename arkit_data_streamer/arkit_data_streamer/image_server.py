@@ -3,9 +3,10 @@ import numpy as np
 import cv2
 import socket
 import struct
+import time
+from threading import Thread
 from rclpy.node import Node
 from rclpy.time import Time
-from .handle_udp import extractUDP
 from std_msgs.msg import Float64, Header
 from sensor_msgs.msg import CompressedImage, CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
@@ -20,10 +21,11 @@ class ImageServerNode(Node):
         self.ios_clock_offset = 0
 
         self.clock_sub = self.create_subscription(Float64, '/ios_clock', self.handle_ios_clock, 10)
-        self.camera_pub = self.create_publisher(CompressedImage, '/camera/image_raw', 10)
+        self.camera_pub = self.create_publisher(CompressedImage, '/camera/image_raw/compressed', 10)
         self.camera_info_pub = self.create_publisher(CameraInfo, '/camera/camera_info', 10)
 
         self.bridge = CvBridge()
+        self.cv_image = None
         self.cvmsg = CompressedImage()
         self.image_data = {}
         self.intrinsic_msg = CameraInfo()
@@ -35,7 +37,14 @@ class ImageServerNode(Node):
                             socket.SOCK_DGRAM) # UDP
         self.sock.bind((UDP_IP, self.port))        
 
-        self.create_timer(0.1, self.run)
+        # self.create_timer(0.05, self.run)
+        thread = Thread(target=self.loop_wrapper)
+        thread.start()
+    
+    def loop_wrapper(self):
+        while True:
+            self.run()
+            time.sleep(0.1)
     
     def run(self):
         data, addr = self.sock.recvfrom(1600)
@@ -43,7 +52,9 @@ class ImageServerNode(Node):
         image_number, packet_number = struct.unpack('<BB', bytes(data[packet_offset:packet_offset+2]))
         packet_offset += 2
 
+        # print(f"{image_number=} {packet_number=}")
         if packet_number == 0:
+            print(f"--------- NEW IMAGE: {image_number} -----------")
             total_packets = struct.unpack('<B', bytes([data[packet_offset]]))[0]
             packet_offset += 1
             self.image_data[image_number] = {}
@@ -73,29 +84,32 @@ class ImageServerNode(Node):
              		 	            0.0, intrinsics_vals[1], intrinsics_vals[2], 0.0, 0.0, 0.0, 1.0, 0.0]
 
             self.image_data[image_number]['intrinsics_message'] = self.intrinsic_msg
-        
+
         elif image_number in self.image_data.keys():
             self.image_data[image_number]['packets_received'] += 1
             self.image_data[image_number]['payload'] += [(packet_number, data[packet_offset:])]
-
+            print(f"Packets received:\t{self.image_data[image_number]['packets_received']}")
+            print(f"Packets expected:\t{self.image_data[image_number]['packets_expected']}")
             # Check if all of the packets for an image have been received
             if self.image_data[image_number]['packets_received'] == self.image_data[image_number]['packets_expected']:
                 self.complete_packet_assembly(image_number)
                 # Ensure images are not published if an image with a later timestamp has already been published
-                if self.last_packet_timestamp.nanoseconds == 0.0 or self.last_packet_timestamp < self.cvmsg.header.stamp:
-                    self.camera_pub.publish(self.cvmsg)
-                    self.camera_info_pub.publish(self.image_data[image_number]['intrinsics_message'])
-                    self.last_packet_timestamp = self.cvmsg.header.stamp
+                # if self.last_packet_timestamp == Time(seconds=0.0) or self.last_packet_timestamp.nanosec < self.cvmsg.header.stamp.nanosec:
+                print("---------- PUBLISHING IMAGE -----------")
+                self.camera_pub.publish(self.cvmsg)
+                self.camera_info_pub.publish(self.image_data[image_number]['intrinsics_message'])
+                self.last_packet_timestamp = self.cvmsg.header.stamp
     
     def handle_ios_clock(self, msg):
         self.ios_clock_offset = msg.data
 
     def complete_packet_assembly(self, image_number):
+        print("---------- ATTEMPTING TO PUBLISH IMAGE ----------")
         self.image_data[image_number]['payload'].sort()
         image = b''
         for packet in self.image_data[image_number]['payload']:
             image += packet[1]
-        
+
         self.cvmsg.header.stamp  = Time(seconds=float(self.ios_clock_offset) + float(self.image_data[image_number]['timestamp'])).to_msg()
         self.cvmsg.header.frame_id = 'camera'
         self.cvmsg.data = image
@@ -103,8 +117,8 @@ class ImageServerNode(Node):
 
         # Convert the iOS image to a cv2 image and lower the resolution
         resize_factor = 1/3.
-        cv_image = self.bridge.compressed_imgmsg_to_cv2(self.cvmsg)
-        flipped_image = cv2.transpose(cv_image) # Transpose and flip the image so it is aligned with the correct camera axes
+        self.cv_image = self.bridge.compressed_imgmsg_to_cv2(self.cvmsg)
+        flipped_image = cv2.transpose(self.cv_image) # Transpose and flip the image so it is aligned with the correct camera axes
         flipped_image = cv2.flip(flipped_image, 1)
         full_res = self.bridge.cv2_to_compressed_imgmsg(flipped_image)
         self.cvmsg.data = full_res.data
