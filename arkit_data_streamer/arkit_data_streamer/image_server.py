@@ -94,12 +94,12 @@ class ImageServerNode(Node):
             if self.image_data[image_number]['packets_received'] == self.image_data[image_number]['packets_expected']:
                 self.complete_packet_assembly(image_number)
                 # Ensure images are not published if an image with a later timestamp has already been published
-                # if self.last_packet_timestamp == Time(seconds=0.0) or self.last_packet_timestamp.nanosec < self.cvmsg.header.stamp.nanosec:
-                print("---------- PUBLISHING IMAGE -----------")
-                self.camera_pub.publish(self.cvmsg)
-                self.camera_info_pub.publish(self.image_data[image_number]['intrinsics_message'])
-                self.last_packet_timestamp = self.cvmsg.header.stamp
-    
+                if self.last_packet_timestamp == Time(seconds=0.0) or self.last_packet_timestamp.nanosec < self.cvmsg.header.stamp.nanosec:
+                    print("---------- PUBLISHING IMAGE -----------")
+                    self.camera_pub.publish(self.cvmsg)
+                    self.camera_info_pub.publish(self.image_data[image_number]['intrinsics_message'])
+                    self.last_packet_timestamp = self.cvmsg.header.stamp
+        
     def handle_ios_clock(self, msg):
         self.ios_clock_offset = msg.data
 
