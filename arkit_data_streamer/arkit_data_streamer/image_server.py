@@ -30,7 +30,7 @@ class ImageServerNode(Node):
         self.image_data = {}
         self.intrinsic_msg = CameraInfo()
         self.updated_intrinsics = None
-        self.last_packet_timestamp = Time(nanoseconds=0.0)
+        self.last_packet_timestamp = None
 
         UDP_IP = "0.0.0.0"
         self.sock = socket.socket(socket.AF_INET, # Internet
@@ -44,7 +44,6 @@ class ImageServerNode(Node):
     def loop_wrapper(self):
         while True:
             self.run()
-            time.sleep(0.1)
     
     def run(self):
         data, addr = self.sock.recvfrom(1600)
@@ -94,7 +93,7 @@ class ImageServerNode(Node):
             if self.image_data[image_number]['packets_received'] == self.image_data[image_number]['packets_expected']:
                 self.complete_packet_assembly(image_number)
                 # Ensure images are not published if an image with a later timestamp has already been published
-                if self.last_packet_timestamp == Time(seconds=0.0) or self.last_packet_timestamp.nanosec < self.cvmsg.header.stamp.nanosec:
+                if self.last_packet_timestamp is None or Time().from_msg(self.last_packet_timestamp) < Time().from_msg(self.cvmsg.header.stamp):
                     print("---------- PUBLISHING IMAGE -----------")
                     self.camera_pub.publish(self.cvmsg)
                     self.camera_info_pub.publish(self.image_data[image_number]['intrinsics_message'])
