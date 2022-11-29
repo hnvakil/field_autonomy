@@ -4,16 +4,19 @@ import torchvision
 import torchvision.transforms as transforms
 from dataset import TrailDataset
 from torchvision.transforms import ToTensor, Lambda
-from model import Net
+from model_paper import Net
+import matplotlib.pyplot as plt
+
 
 batch_size = 64
 num_classes = 3
 learning_rate = 0.001
-num_epochs = 3
+num_epochs = 10
+img_size = 101
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-all_transforms = transforms.Compose([transforms.Resize((32,32)),
+all_transforms = transforms.Compose([transforms.Resize((img_size,img_size)),
                                      transforms.ToTensor(),
                                      transforms.Normalize(mean=[0.4914, 0.4822, 0.4465],
                                                           std=[0.2023, 0.1994, 0.2010])
@@ -37,6 +40,7 @@ model = Net(num_classes)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, weight_decay = 0.005, momentum = 0.9)  
 total_step = len(train_loader)
+loss_plot = []
 
 for epoch in range(num_epochs):
 	#load in data with train loader
@@ -46,7 +50,7 @@ for epoch in range(num_epochs):
         
         outputs = model(images)
         loss = criterion(outputs, labels)
-        
+        loss_plot.append(loss.detach().numpy())
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -68,5 +72,7 @@ with torch.no_grad():
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
     
-    print('Accuracy of the network on the {} train images: {} %'.format(len(test_loader), 100 * correct / total))
+    print('Accuracy of the network on the {} test images: {} %'.format(len(test_loader), 100 * correct / total))
 
+plt.plot(loss_plot)
+plt.show()

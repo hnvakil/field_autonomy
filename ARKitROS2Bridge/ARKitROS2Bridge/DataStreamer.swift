@@ -6,6 +6,20 @@
 //
 
 import Foundation
+import SwiftUI
+
+extension UIImage {
+    func scaleImage(_ scale: CGFloat) -> UIImage {
+        let newHeight = self.size.height * scale
+        let newWidth = self.size.width * scale
+        let newSize = CGSize(width:newWidth, height:newHeight)
+        let renderer = UIGraphicsImageRenderer(size:newSize)
+        
+        return renderer.image {_ in
+            self.draw(in:CGRect(origin:.zero, size:newSize))
+        }
+    }
+}
 
 class DataStreamer: ObservableObject {
     @Published var ipAddressText: String = ""
@@ -64,7 +78,8 @@ class DataStreamer: ObservableObject {
         let intrinsics = arView.getCameraIntrinsics()
         let MTU = 1350
         let (image, stampedTime) = arView.getVideoFrames()
-        let imageData = image.jpegData(compressionQuality: 0)
+        let resizedImage = image.scaleImage(0.2)
+        let imageData = resizedImage.jpegData(compressionQuality: 0.0)
         let frameTime = String(stampedTime).data(using: .utf8)!
         let timeAndIntrinsics = frameTime + intrinsics
         var bytesSent = 0           // Keeps track of how much of the image has been sent
