@@ -1,5 +1,8 @@
 #include <Servo.h>
 #include <math.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define CH1 3
 #define CH2 5
@@ -16,7 +19,7 @@ float ch2Norm;
 float upDown;
 float leftRightStick;
 float joystickPositions[2]; //0 = upDown, 1 = leftRight
-float speeds[2]; //0 = left tread speed, 1 = right tread speed
+float speeds[2] = {0.0, 0.0}; //0 = left tread speed, 1 = right tread speed
 
 float forwardBack = 0.0; // 0 to 1 forwards, 0 to -1 back
 float leftRight = 0.0; // 0 to 1 right, 0 to -1 left
@@ -24,36 +27,175 @@ float leftRight = 0.0; // 0 to 1 right, 0 to -1 left
 float leftTrackSpeed;
 float rightTrackSpeed;
 
+int leftStickVal;
+
+bool printDebugging = true;
+
+const byte numChars = 32;
+char receivedChars[numChars];   // an array to store the received data
+String s_a;
+boolean newData = true;
+float serialInput[2]; //0: linear, 1: angular
+
+
 
 void setup() {
   Serial.begin(9600);
   leftMotor.attach(9);  // attaches the esc on pin 9 to the servo object
   rightMotor.attach(10); // attaches the esc on pin 10 to the servo object
+  pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop() {
-  getStickPositions();
-  Serial.print("  | stick up down ");
-  Serial.print(joystickPositions[0]);
-  Serial.print("  | stick leftRight ");
-  Serial.print(joystickPositions[1]);
+  leftStickVal = getLeftStickPos();
+  if (leftStickVal == 2){
+    digitalWrite(LED_BUILTIN, HIGH);
+    if (printDebugging) {
+      Serial.println("In serial listening mode");
+    }
+    Serial.println("before recv");
+    recvWithEndMarker();
+    Serial.println("after recv");
+    showNewData();
+    Serial.println("after showNew");
+    if (printDebugging){
+      Serial.print("linear val: ");
+      Serial.print(serialInput[0]);
+      Serial.print("   angular val: ");
+      Serial.println(serialInput[1]);
+    }
+    getSpeedsSerial(serialInput[0], serialInput[1]);
+    //Serial.println(serialInput[0]);
+    if (printDebugging){
+      Serial.print("  left tread: ");
+      Serial.print(speeds[0]);
+      Serial.print("  right tread: ");
+      Serial.print(speeds[1]);
+    }
+    writeSpeeds(speeds[0], speeds[1]);
+    delay(500); //REMOVE ONLY FOR DEBUGGING
+    if (printDebugging){
+      Serial.println("");
+    }
+  } else if (leftStickVal == 1){
+    digitalWrite(LED_BUILTIN, LOW);
+    getStickPositions();
+    getSpeedsStick(joystickPositions[0], joystickPositions[1]);
+    writeSpeeds(speeds[0], speeds[1]);
+    //writeSpeeds(0.0,0.0);
 
-  getSpeeds(joystickPositions[0], joystickPositions[1]);
-  Serial.print("  | speed front back ");
-  Serial.print(speeds[0]);
-  Serial.print("  | speed left right ");
-  Serial.print(speeds[1]);
+    if (printDebugging) {
+      Serial.print("  | stick up down ");
+      Serial.print(joystickPositions[0]);
+      Serial.print("  | stick leftRight ");
+      Serial.print(joystickPositions[1]);
 
-  writeSpeeds(speeds[0], speeds[1]);
-  Serial.println("");
-
-  delay(50);
-  //writeSpeeds(0.0,0.0);
-
-  //delay(500);
+      Serial.print("  | left tread speed ");
+      Serial.print(speeds[0]);
+      Serial.print("  | right tread speed ");
+      Serial.print(speeds[1]);
+      
+      Serial.println("");
+    }
+    delay(50);
+  } else {
+    if (printDebugging){
+      Serial.println("In passive mode");
+    }
+    writeSpeeds(0.0,0.0);
+  }
 }
 
-void getSpeeds(float forwardBack, float leftRight){
+String convertToString(char* a){
+  String s = a;
+  return s;
+}
+
+void recvWithEndMarker() {
+    static byte ndx = 0;
+    char endMarker = '\n';
+    char rc;
+    
+    while (Serial.available() > 0 && newData == false) {
+        rc = Serial.read();
+
+        if (rc != endMarker) {
+            receivedChars[ndx] = rc;
+            ndx++;
+            if (ndx >= numChars) {
+                ndx = numChars - 1;
+            }
+        }
+        else {
+            receivedChars[ndx] = '\0'; // terminate the string
+            ndx = 0;
+            newData = true;
+        }
+    }
+}
+
+String getValue(String data, char separator, int index)
+{
+    int found = 0;
+    int strIndex[] = { 0, -1 };
+    int maxIndex = data.length() - 1;
+
+    for (int i = 0; i <= maxIndex && found <= index; i++) {
+        if (data.charAt(i) == separator || i == maxIndex) {
+            found++;
+            strIndex[0] = strIndex[1] + 1;
+            strIndex[1] = (i == maxIndex) ? i+1 : i;
+        }
+    }
+    return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
+
+void showNewData() {
+    if (newData == true) {
+        //String s_a = convertToString(receivedChars);
+        char* velVal = strtok(receivedChars, ",");
+        char* firstValChar = velVal;
+        velVal = strtok(NULL, ",");
+        char* secondValChar = velVal;
+        float firstFloat = atof(firstValChar);
+        float secondFloat = atof(secondValChar);
+        Serial.print("first float: ");
+        Serial.print(firstFloat);
+        Serial.print(" | second float: ");
+        Serial.println(secondFloat);
+
+        //String firstVal = getValue(s_a, ',', 0);
+        //String secondVal = getValue(s_a, ',', 1);
+        //float firstFloat = firstVal.toFloat();
+        //float secondFloat = secondVal.toFloat();
+        
+        serialInput[0] = firstFloat;
+        serialInput[1] = secondFloat;
+        newData = false;
+    }
+}
+
+void getSpeedsSerial(float linear, float angular){
+  float leftTread = linear - angular;
+  float rightTread = linear + angular;
+  speeds[0] = leftTread;
+  speeds[1] = rightTread;
+}
+
+int getLeftStickPos(){
+  ch3Value = readChannel(CH3, -100, 100, 0);
+  //Serial.print("   ch3 val: ");
+  //Serial.println(ch3Value);
+  if (ch3Value > 1800){
+    return 2;
+  } else if (ch3Value > 1100){
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+void getSpeedsStick(float forwardBack, float leftRight){
   leftTrackSpeed = forwardBack + leftRight;
   rightTrackSpeed = forwardBack - leftRight;
   if (abs(leftTrackSpeed) > 1){
@@ -86,7 +228,6 @@ void writeSpeeds(float leftSpeed, float rightSpeed){
 void getStickPositions(){
   ch1Value = readChannel(CH1, -100, 100, 0);
   ch2Value = readChannel(CH2, -100, 100, 0);
-  ch3Value = readChannel(CH3, -100, 100, 0);
   
   ch1Norm = ch1Value - 1500;
   ch2Norm = ch2Value - 1455;
