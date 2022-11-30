@@ -10,6 +10,10 @@ class OdometryRecorderNode(Node):
 
         self.marker_num = 0
 
+        self.odom_file = open("robot_path.csv", "w+")
+        self.odom_file.write("x,y,z\n")
+        self.odom_file.flush()
+
         self.create_subscription(PoseStamped, '/device_pose', self.record_point, 10)
 
         self.odom_marker_pub = self.create_publisher(Marker, '/odom_markers', 10)
@@ -41,6 +45,9 @@ class OdometryRecorderNode(Node):
 
         self.marker_num += 1
         self.odom_marker_pub.publish(marker)
+
+        self.odom_file.write(f"{pose.pose.position.x},{pose.pose.position.y},{pose.pose.position.z}\n")
+        self.odom_file.flush()
 
 def main():
     rclpy.init()
