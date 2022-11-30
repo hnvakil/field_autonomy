@@ -4,16 +4,14 @@ from rclpy.node import Node
 import time
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
-from PIL import Image
 from direction_interfaces.msg import Direction
-from trail_model.model_paper import Net
+from .model_paper import Net
 import torch
 from PIL import Image
 import torchvision.transforms as transforms
 
-model_path = "/home/kat/ros2_ws/src/field_autonomy/trail_model/trained_models/paper_10e.pth"
+model_path = "/home/kat/ros2_ws/src/field_autonomy/trail_finding/trail_finding/trail_model/trained_models/paper_10e.pth"
 directions = ["LEFT", "CENTER", "RIGHT"]
-
 
 class FindTrail(Node):
     """ Find Trail is a ROS node which takes and image and identifies
@@ -22,10 +20,13 @@ class FindTrail(Node):
     def __init__(self, image_topic):
         """ Initialize the node """
         super().__init__('find_trail')
-        self.PIL_image = None                        # the latest image from the camera
-        self.bridge = CvBridge()                    # used to convert ROS messages to OpenCV
+        self.PIL_image = None                     
+        self.subscription = self.create_subscription(
+            Direction, #this needs to change!!!!!! 
+            image_topic,
+            self.process_image,
+            10)
 
-        self.create_subscription(Image, image_topic, self.process_image, 10)
         self.pub = self.create_publisher(Direction, 'dir_msg', 10)
         
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -46,7 +47,7 @@ class FindTrail(Node):
     def process_image(self, msg):
         """ Process image messages and store them in
             PIL_image as a for subsequent processing """
-        self.PIL_image = Image.fromarray(msg)
+        self.PIL_image = self.PILImage.fromarray(msg)
         
 
     def loop_wrapper(self):

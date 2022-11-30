@@ -20,6 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'find_trail = trail_finding.find_trail:main',
         ],
     },
 )
