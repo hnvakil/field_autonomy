@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'trail_finding'
+package_name = 'arduino_ros'
 
 setup(
     name=package_name,
@@ -13,14 +13,14 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='kat',
-    maintainer_email='k82019@gmail.com',
+    maintainer='hvakil',
+    maintainer_email='hvakil@olin.edu',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'find_trail = trail_finding.find_trail:main',
+            'TreadWriter = arduino_ros.TreadWriter:main'
         ],
     },
 )
