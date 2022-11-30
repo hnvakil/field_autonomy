@@ -55,7 +55,10 @@ class Serial_cmd:
             raise Exception("self not connected!")
     def read_data(self):
         if self.connected:
-            print(self.dev.readline().decode().rstrip())
+            try:
+                print(self.dev.readline().decode().rstrip())
+            except:
+                pass
 
 class TreadWriterNode(Node):
     def __init__(self):
@@ -71,13 +74,27 @@ class TreadWriterNode(Node):
             raise Exception("error connecting")
 
     def run_loop(self):
-        print("with write")
-        print(f"self.linear: {self.linear} of type {type(self.linear)}")
-        print(f"self.angular: {self.angular} of type {type(self.angular)}")
-        string_to_write = f"{self.linear},{self.angular}\n"
-        print(string_to_write)
-        self.writer.write_data_to_arduino(string_to_write)
+        print("")
 
+        to_print = ""
+        #print("start python prints:")
+        to_print += "start python prints: "
+        #print(f"self.linear: {self.linear} of type {type(self.linear)}")
+        #print(f"self.angular: {self.angular} of type {type(self.angular)}")
+        to_print += f"self.linear: {self.linear} of type {type(self.linear)}"
+        to_print += f"self.angular: {self.angular}"
+        
+        string_to_write = f"<{self.linear},{self.angular}\n"
+        #print(string_to_write)
+        to_print += string_to_write
+        self.writer.write_data_to_arduino(string_to_write)
+        start = time.time()
+        while self.writer.dev.in_waiting:
+            self.writer.read_data()
+        #print("elapsed " + str(time.time() - start))
+        #print("end python prints")
+        print(to_print)
+        print("")
 
     def process_twist(self, msg):
         self.linear = msg.linear.x
