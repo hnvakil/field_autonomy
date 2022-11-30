@@ -21,7 +21,9 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'pose_server = arkit_data_streamer.pose_server:main'
+            'pose_server = arkit_data_streamer.pose_server:main',
+            'image_server = arkit_data_streamer.image_server:main',
+            'odometry_recorder = arkit_data_streamer.odometry_recorder:main'
         ],
     },
 )

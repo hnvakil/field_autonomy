@@ -5,6 +5,13 @@ from tf2_ros.transform_broadcaster import TransformBroadcaster
 from rclpy.duration import Duration
 import PyKDL
 
+def convert_matrix_to_frame(transform_matrix):
+    trans = PyKDL.Vector(transform_matrix[0,3], transform_matrix[1,3], transform_matrix[2,3])
+    rot = PyKDL.Rotation(transform_matrix[0,0], transform_matrix[0,1], transform_matrix[0,2],
+                         transform_matrix[1,0], transform_matrix[1,1], transform_matrix[1,2],
+                         transform_matrix[2,0], transform_matrix[2,1], transform_matrix[2,2])
+    return PyKDL.Frame(rot, trans)
+
 class TFHelper(object):
     """ TFHelper Provides functionality to convert poses between various
         forms, compare angles in a suitable way, and publish needed
