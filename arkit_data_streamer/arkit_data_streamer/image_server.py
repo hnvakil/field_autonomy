@@ -107,7 +107,7 @@ class ImageServerNode(Node):
         self.cvmsg.format = 'jpeg'
 
         # Convert the iOS image to a cv2 image and lower the resolution
-        resize_factor = 1/3.
+        resize_factor = 0.2
         self.cv_image = self.bridge.compressed_imgmsg_to_cv2(self.cvmsg)
         flipped_image = cv2.transpose(self.cv_image) # Transpose and flip the image so it is aligned with the correct camera axes
         flipped_image = cv2.flip(flipped_image, 1)
