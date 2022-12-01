@@ -28,7 +28,7 @@ float rightTrackSpeed;
 
 int leftStickVal;
 
-bool printDebugging = true;
+bool printDebugging = false;
 
 const byte numChars = 32;
 char receivedChars[numChars];   // an array to store the received data
@@ -49,32 +49,42 @@ void loop() {
   if (leftStickVal == 2){
     digitalWrite(LED_BUILTIN, HIGH);
     if (printDebugging) {
-      Serial.println("In serial listening mode");
+      //Serial.println("In serial listening mode");
+      Serial.println("");
+      Serial.println("arduino data start:");
     }
-    Serial.println("before recv");
+    //Serial.println("before recv");
     recvWithEndMarker();
-    Serial.println("after recv");
+    //Serial.println("after recv");
     showNewData();
-    Serial.println("after showNew");
+    //Serial.println("after showNew");
     if (printDebugging){
       Serial.print("linear val: ");
       Serial.print(serialInput[0]);
       Serial.print("   angular val: ");
       Serial.println(serialInput[1]);
     }
+    Serial.print("linear val: ");
+    Serial.print(serialInput[0]);
+    Serial.print("   angular val: ");
+    Serial.println(serialInput[1]);
     getSpeedsSerial(serialInput[0], serialInput[1]);
     //Serial.println(serialInput[0]);
     if (printDebugging){
       Serial.print("  left tread: ");
       Serial.print(speeds[0]);
       Serial.print("  right tread: ");
-      Serial.print(speeds[1]);
+      Serial.println(speeds[1]);
     }
+    //Serial.println(speeds[0]);
     writeSpeeds(speeds[0], speeds[1]);
-    delay(500); //REMOVE ONLY FOR DEBUGGING
     if (printDebugging){
+      Serial.println("arduino data end");
       Serial.println("");
     }
+    //delay(2000); //REMOVE ONLY FOR DEBUGGING
+    
+    
   } else if (leftStickVal == 1){
     digitalWrite(LED_BUILTIN, LOW);
     getStickPositions();
@@ -106,18 +116,38 @@ void loop() {
 
 void recvWithEndMarker() {
     static byte ndx = 0;
-    char endMarker = '>';
+    char endMarker = '\n';
+    char startMarker = '<';
     char rc;
+    bool gottenStart = false;
     
     while (Serial.available() > 0 && newData == false) {
+        //Serial.println("while loop start");
         rc = Serial.read();
+        //Serial.println(rc);
+
+        if (rc == startMarker){
+          gottenStart = true;
+          //Serial.println("gotten start");
+        }
+
+        if (!gottenStart){
+          //Serial.println("hasn't gotten start yet");
+          continue;
+        }
+        //Serial.println("has gotten start");
+
+        
 
         if (rc != endMarker) {
-            receivedChars[ndx] = rc;
-            ndx++;
-            if (ndx >= numChars) {
-                ndx = numChars - 1;
+            if (rc != startMarker){
+              receivedChars[ndx] = rc;
+              ndx++;
+              if (ndx >= numChars) {
+                  ndx = numChars - 1;
+              }
             }
+            
         }
         else {
             receivedChars[ndx] = '\0'; // terminate the string
@@ -129,6 +159,7 @@ void recvWithEndMarker() {
 
 void showNewData() {
     if (newData == true) {
+        //Serial.println(receivedChars);
         char* velVal = strtok(receivedChars, ",");
         char* firstValChar = velVal;
         velVal = strtok(NULL, ",");
