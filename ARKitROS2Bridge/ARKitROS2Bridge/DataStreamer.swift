@@ -75,10 +75,11 @@ class DataStreamer: ObservableObject {
     
     /// Sends the camera frames to ROS
     @objc func transmitImages() {
-        let intrinsics = arView.getCameraIntrinsics()
+        let resizeFactor:Float = 0.2
+        let intrinsics = arView.getCameraIntrinsics(resizeFactor)
         let MTU = 1350
         let (image, stampedTime) = arView.getVideoFrames()
-        let resizedImage = image.scaleImage(0.2)
+        let resizedImage = image.scaleImage(CGFloat(resizeFactor))
         let imageData = resizedImage.jpegData(compressionQuality: 0.0)
         let frameTime = String(stampedTime).data(using: .utf8)!
         let timeAndIntrinsics = frameTime + intrinsics

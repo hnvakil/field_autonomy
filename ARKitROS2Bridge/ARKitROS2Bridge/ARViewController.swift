@@ -10,7 +10,7 @@ import UIKit
 import ARKit
 
 class ARViewController: UIViewController, ARSessionDelegate, ObservableObject {
-
+    
     let configuration = ARWorldTrackingConfiguration()
     
     // Create an AR view
@@ -77,7 +77,7 @@ class ARViewController: UIViewController, ARSessionDelegate, ObservableObject {
     }
         
     /// Get the camera intrinsics to send to ROS
-    func getCameraIntrinsics() -> Data {
+    func getCameraIntrinsics(_ resizeFactor: Float) -> Data {
         let camera = arView.session.currentFrame?.camera
         let intrinsics = camera?.intrinsics
         let columns = intrinsics?.columns
@@ -85,7 +85,7 @@ class ARViewController: UIViewController, ARSessionDelegate, ObservableObject {
         let width = res?.width
         let height = res?.height
         
-        return String(format: "%f,%f,%f,%f,%f,%f,%f", columns!.0.x, columns!.1.y, columns!.2.x, columns!.2.y, columns!.2.z, width!, height!).data(using: .utf8)!
+        return String(format: "%f,%f,%f,%f,%f,%f,%f", columns!.0.x*resizeFactor, columns!.1.y*resizeFactor, columns!.2.x*resizeFactor, columns!.2.y*resizeFactor, columns!.2.z*resizeFactor, width!*CGFloat(resizeFactor), height!*CGFloat(resizeFactor)).data(using: .utf8)!
         }
     
     override func didReceiveMemoryWarning() {
