@@ -24,7 +24,6 @@ class FindTrail(Node):
         """ Initialize the node """
         super().__init__('find_trail')
         self.PIL_image = None    
-        self.image_dims = None    
         self.bridge = CvBridge()
 
         self.subscription = self.create_subscription(
@@ -34,12 +33,6 @@ class FindTrail(Node):
             10)
 
         self.pub = self.create_publisher(Direction, 'dir_msg', 10)
-
-        self.subscription_camera_info = self.create_subscription(
-            CameraInfo,
-            '/camera/camera_info',
-            self.set_camera_info,
-            10)
         
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.transforms = transforms.Compose([transforms.Resize((101,101)),
@@ -59,15 +52,8 @@ class FindTrail(Node):
     def process_image(self, msg):
         """ Process image messages and store them in
             PIL_image as a for subsequent processing """
-        if not(self.image_dims == None):
-            cv_img = self.bridge.compressed_imgmsg_to_cv2(msg)
-            self.PIL_image = Image.fromarray(cv_img)
-    
-    def set_camera_info(self, msg):
-        """
-        set camera info settings
-        """
-        self.image_dims = [msg.width, msg.height]
+        cv_img = self.bridge.compressed_imgmsg_to_cv2(msg)
+        self.PIL_image = Image.fromarray(cv_img)
 
     def loop_wrapper(self):
         """ This function takes care of calling the run_loop function repeatedly.
