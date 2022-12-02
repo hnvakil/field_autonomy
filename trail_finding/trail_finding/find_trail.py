@@ -86,9 +86,9 @@ class FindTrail(Node):
         # input = Variable(image_tensor)
         input = image_tensor.to(self.device)
         output = self.model(input)
-        weights = output.data.cpu().numpy()
+        weights = output.data.cpu().numpy()[0]
         index = weights.argmax()
-        return Direction(direction = directions[index], left_weights = weights[0], center_weight = weights[1], right_weight = weights[2])
+        return Direction(direction = directions[index], left_weight = float(weights[0]), center_weight = float(weights[1]), right_weight = float(weights[2]))
 
     def run_loop(self):
         """
