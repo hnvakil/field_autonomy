@@ -69,14 +69,14 @@ class ImageServerNode(Node):
 
             # Set camera intrinsics
             self.intrinsic_msg.header.stamp = Time(seconds=float(self.ios_clock_offset) + float(stampedTime)).to_msg()
-            self.intrinsic_msg.width = int(intrinsics_vals[6])
-            self.intrinsic_msg.height = int(intrinsics_vals[5])
+            self.intrinsic_msg.width = int(intrinsics_vals[5])
+            self.intrinsic_msg.height = int(intrinsics_vals[6])
             self.intrinsic_msg.distortion_model = 'plumb_bob'
             self.intrinsic_msg.d = [0.0, 0.0, 0.0, 0.0, 0.0]
-            self.intrinsic_msg.k = [intrinsics_vals[0], 0.0, intrinsics_vals[3], # Preemptively switch the principal point offsets since the image will be transposed and flipped
-             		 	            0.0, intrinsics_vals[1], intrinsics_vals[2], 0.0, 0.0, 1.0]
-            self.intrinsic_msg.p = [intrinsics_vals[0], 0.0, intrinsics_vals[3], 0.0,
-             		 	            0.0, intrinsics_vals[1], intrinsics_vals[2], 0.0, 0.0, 0.0, 1.0, 0.0]
+            self.intrinsic_msg.k = [intrinsics_vals[0], 0.0, intrinsics_vals[2],
+             		 	            0.0, intrinsics_vals[1], intrinsics_vals[3], 0.0, 0.0, 1.0]
+            self.intrinsic_msg.p = [intrinsics_vals[0], 0.0, intrinsics_vals[2], 0.0,
+             		 	            0.0, intrinsics_vals[1], intrinsics_vals[3], 0.0, 0.0, 0.0, 1.0, 0.0]
 
             self.image_data[image_number]['intrinsics_message'] = self.intrinsic_msg
 
@@ -89,7 +89,7 @@ class ImageServerNode(Node):
                 # Ensure images are not published if an image with a later timestamp has already been published
                 if self.last_packet_timestamp is None or Time().from_msg(self.last_packet_timestamp) < Time().from_msg(self.cvmsg.header.stamp):
                     self.camera_pub.publish(self.cvmsg)
-                    self.camera_info_pub.publish(self.image_data[image_number]['intrinsics_message'])
+                    self.camera_info_pub.publish(self.updated_intrinsics)
                     self.last_packet_timestamp = self.cvmsg.header.stamp
         
     def handle_ios_clock(self, msg):
@@ -108,13 +108,13 @@ class ImageServerNode(Node):
 
         # Convert the iOS image to a cv2 image and lower the resolution
         resize_factor = 0.2
-        self.cv_image = self.bridge.compressed_imgmsg_to_cv2(self.cvmsg)
-        flipped_image = cv2.transpose(self.cv_image) # Transpose and flip the image so it is aligned with the correct camera axes
-        flipped_image = cv2.flip(flipped_image, 1)
-        full_res = self.bridge.cv2_to_compressed_imgmsg(flipped_image)
-        self.cvmsg.data = full_res.data
+        # self.cv_image = self.bridge.compressed_imgmsg_to_cv2(self.cvmsg)
+        # flipped_image = cv2.transpose(self.cv_image) # Transpose and flip the image so it is aligned with the correct camera axes
+        # flipped_image = cv2.flip(flipped_image, 1)
+        # full_res = self.bridge.cv2_to_compressed_imgmsg(flipped_image)
+        # self.cvmsg.data = full_res.data
 
-        # Update the camera intrinsics for the flipped images
+        # Update the camera intrinsics for the resized images
         self.updated_intrinsics = CameraInfo()
         self.updated_intrinsics.k = [v * resize_factor if v != 1.0 else v for v in self.image_data[image_number]['intrinsics_message'].k]
         self.updated_intrinsics.p = [v * resize_factor if v != 1.0 else v for v in self.image_data[image_number]['intrinsics_message'].p]
