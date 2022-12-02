@@ -2,13 +2,16 @@ import rclpy
 from threading import Thread
 from rclpy.node import Node
 import time
-from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 from direction_interfaces.msg import Direction
 from .model_paper import Net
 import torch
 from PIL import Image
 import torchvision.transforms as transforms
+from sensor_msgs.msg import CompressedImage, CameraInfo
+import cv2
+import numpy as np
+
 
 model_path = "/home/kat/ros2_ws/src/field_autonomy/trail_finding/trail_finding/trail_model/trained_models/paper_10e.pth"
 directions = ["LEFT", "CENTER", "RIGHT"]
@@ -20,14 +23,23 @@ class FindTrail(Node):
     def __init__(self, image_topic):
         """ Initialize the node """
         super().__init__('find_trail')
-        self.PIL_image = None                     
+        self.PIL_image = None    
+        self.image_dims = None    
+        self.bridge = CvBridge()
+
         self.subscription = self.create_subscription(
-            Direction, #this needs to change!!!!!! 
+            CompressedImage,
             image_topic,
             self.process_image,
             10)
 
         self.pub = self.create_publisher(Direction, 'dir_msg', 10)
+
+        self.subscription_camera_info = self.create_subscription(
+            CameraInfo,
+            '/camera/camera_info',
+            self.set_camera_info,
+            10)
         
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.transforms = transforms.Compose([transforms.Resize((101,101)),
@@ -47,8 +59,15 @@ class FindTrail(Node):
     def process_image(self, msg):
         """ Process image messages and store them in
             PIL_image as a for subsequent processing """
-        self.PIL_image = self.PILImage.fromarray(msg)
-        
+        if not(self.image_dims == None):
+            cv_img = self.bridge.compressed_imgmsg_to_cv2(msg)
+            self.PIL_image = Image.fromarray(cv_img)
+    
+    def set_camera_info(self, msg):
+        """
+        set camera info settings
+        """
+        self.image_dims = [msg.width, msg.height]
 
     def loop_wrapper(self):
         """ This function takes care of calling the run_loop function repeatedly.
@@ -67,8 +86,9 @@ class FindTrail(Node):
         # input = Variable(image_tensor)
         input = image_tensor.to(self.device)
         output = self.model(input)
-        index = output.data.cpu().numpy().argmax()
-        return Direction(direction = directions[index])
+        weights = output.data.cpu().numpy()[0]
+        index = weights.argmax()
+        return Direction(direction = directions[index], left_weight = float(weights[0]), center_weight = float(weights[1]), right_weight = float(weights[2]))
 
     def run_loop(self):
         """
@@ -79,14 +99,14 @@ class FindTrail(Node):
             dir = self.calculate_direction()
             self.pub.publish(dir)
 
-if __name__ == '__main__':
-    node = FindTrail("/camera/image_raw")
-    node.run()
+# if __name__ == '__main__':
+#     node = FindTrail("/camera/image_raw/compressed")
+#     node.run()
 
 
 def main(args=None):
     rclpy.init()
-    n = FindTrail("camera/image_raw")
+    n = FindTrail("/camera/image_raw/compressed")
     rclpy.spin(n)
     rclpy.shutdown()
 
