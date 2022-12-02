@@ -1,5 +1,4 @@
 import rclpy
-import cv2
 import socket
 import struct
 from threading import Thread
@@ -48,7 +47,6 @@ class ImageServerNode(Node):
         image_number, packet_number = struct.unpack('<BB', bytes(data[packet_offset:packet_offset+2]))
         packet_offset += 2
 
-        # print(f"{image_number=} {packet_number=}")
         if packet_number == 0:
             total_packets = struct.unpack('<B', bytes([data[packet_offset]]))[0]
             packet_offset += 1
@@ -89,7 +87,7 @@ class ImageServerNode(Node):
                 # Ensure images are not published if an image with a later timestamp has already been published
                 if self.last_packet_timestamp is None or Time().from_msg(self.last_packet_timestamp) < Time().from_msg(self.cvmsg.header.stamp):
                     self.camera_pub.publish(self.cvmsg)
-                    self.camera_info_pub.publish(self.updated_intrinsics)
+                    self.camera_info_pub.publish(self.image_data[image_number]['intrinsics_message'])
                     self.last_packet_timestamp = self.cvmsg.header.stamp
         
     def handle_ios_clock(self, msg):
@@ -105,23 +103,6 @@ class ImageServerNode(Node):
         self.cvmsg.header.frame_id = 'camera'
         self.cvmsg.data = image
         self.cvmsg.format = 'jpeg'
-
-        # Convert the iOS image to a cv2 image and lower the resolution
-        resize_factor = 0.2
-        # self.cv_image = self.bridge.compressed_imgmsg_to_cv2(self.cvmsg)
-        # flipped_image = cv2.transpose(self.cv_image) # Transpose and flip the image so it is aligned with the correct camera axes
-        # flipped_image = cv2.flip(flipped_image, 1)
-        # full_res = self.bridge.cv2_to_compressed_imgmsg(flipped_image)
-        # self.cvmsg.data = full_res.data
-
-        # Update the camera intrinsics for the resized images
-        self.updated_intrinsics = CameraInfo()
-        self.updated_intrinsics.k = [v * resize_factor if v != 1.0 else v for v in self.image_data[image_number]['intrinsics_message'].k]
-        self.updated_intrinsics.p = [v * resize_factor if v != 1.0 else v for v in self.image_data[image_number]['intrinsics_message'].p]
-        self.updated_intrinsics.width = int(self.image_data[image_number]['intrinsics_message'].width * resize_factor)
-        self.updated_intrinsics.height = int(self.image_data[image_number]['intrinsics_message'].height * resize_factor)
-        self.updated_intrinsics.header.stamp  = Time(seconds=float(self.ios_clock_offset) + float(self.image_data[image_number]['timestamp'])).to_msg()
-        self.updated_intrinsics.header.frame_id = 'camera'
 
 def main():
     rclpy.init()
