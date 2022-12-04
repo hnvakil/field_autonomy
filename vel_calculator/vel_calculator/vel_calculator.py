@@ -9,7 +9,7 @@ from geometry_msgs.msg import Vector3
 
 LINMULT = .025
 LINADD = 10
-ANGMULT = .1
+ANGMULT = .025
 MAXSPEED = .5
 
 class CalculateVel(Node):
@@ -32,10 +32,12 @@ class CalculateVel(Node):
         linear_vel = 0.0
         angular_vel = 0.0
         if not(self.center_weight == None):
-            linear_vel = min(LINMULT * (self.center_weight + LINADD), MAXSPEED)
-            linear_vel = max(linear_vel, 0)
             angular_vel = min(ANGMULT*(self.right_weight - self.left_weight), MAXSPEED)
             angular_vel = max(angular_vel, -1*MAXSPEED)
+            # linear_vel = min(LINMULT * (self.center_weight + LINADD), MAXSPEED)
+            linear_vel = min(LINMULT * (self.center_weight + LINADD)/angular_vel, MAXSPEED)
+            linear_vel = max(linear_vel, 0)
+
 
 
         linear = Vector3(x=float(linear_vel),y=0.0,z=0.0)
