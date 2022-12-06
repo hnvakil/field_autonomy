@@ -5,7 +5,6 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='arkit_data_streamer',
-            namespace='pose_server',
             executable='pose_server',
             name='pose_server',
             parameters=[
@@ -14,7 +13,6 @@ def generate_launch_description():
         ),
         Node(
             package='arkit_data_streamer',
-            namespace='image_server',
             executable='image_server',
             name='image_server',
             parameters=[
@@ -23,14 +21,12 @@ def generate_launch_description():
         ),
         Node(
             package='vel_calculator',
-            namespace='vel_calculator',
             executable='vel_calculator',
-            name='send_message_node'
+            name='vel_calculator'
+        ),
+        Node(
+            package='trail_finding',
+            executable='find_trail',
+            name='find_trail'
         )
-        # Node(
-        #     package='trail_finding',
-        #     namespace='find_trail',
-        #     exec_name='find_trail',
-        #     name='find_trail'
-        # )
     ])

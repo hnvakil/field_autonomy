@@ -20,8 +20,8 @@ class CalculateVel(Node):
         self.left_weight = None
         self.right_weight = None 
         self.center_weight = None
-        self.publisher = self.create_publisher(Twist, 'cmd_vel', 10)
-        self.subscriber = self.create_subscription(Direction, 'dir_msg', self.get_dir, 10)
+        self.publisher = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.subscriber = self.create_subscription(Direction, '/dir_msg', self.get_dir, 10)
 
 
     def run_loop(self):
