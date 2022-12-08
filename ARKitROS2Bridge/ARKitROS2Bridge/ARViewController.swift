@@ -8,10 +8,14 @@
 
 import UIKit
 import ARKit
+import MapKit
+import CoreLocation
 
-class ARViewController: UIViewController, ARSessionDelegate, ObservableObject {
+class ARViewController: UIViewController, ARSessionDelegate, ObservableObject, CLLocationManagerDelegate {
     
     let configuration = ARWorldTrackingConfiguration()
+    
+    let locationManager = CLLocationManager()
     
     // Create an AR view
     var arView: ARSCNView! {
@@ -23,6 +27,8 @@ class ARViewController: UIViewController, ARSessionDelegate, ObservableObject {
         }
     }
     
+    var location: CLLocationCoordinate2D = CLLocationCoordinate2D()
+    
     override func loadView() {
       self.view = ARSCNView(frame: .zero)
     }
@@ -32,6 +38,18 @@ class ARViewController: UIViewController, ARSessionDelegate, ObservableObject {
         super.viewDidLoad()
         arView.session.delegate = self
         arView.scene = SCNScene()
+        
+        locationManager.requestAlwaysAuthorization()
+        locationManager.requestWhenInUseAuthorization()
+        
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+        locationManager.startUpdatingLocation()
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let locValue: CLLocationCoordinate2D = manager.location?.coordinate else { return }
+        self.location = locValue
     }
     
     // Functions for standard AR view handling
@@ -48,6 +66,12 @@ class ARViewController: UIViewController, ARSessionDelegate, ObservableObject {
     override func viewWillDisappear(_ animated: Bool) {
        super.viewWillDisappear(animated)
        arView.session.pause()
+    }
+    
+    /// Get GPS coordinates
+    func getGPSCoordinates() -> String {
+        let relativeTime = arView.session.currentFrame?.timestamp
+        return String(format: "%f,%f,%f", self.location.latitude, self.location.longitude, relativeTime!)
     }
     
     /// Get video frames.

@@ -26,9 +26,11 @@ class DataStreamer: ObservableObject {
     
     var broadcastPoseConnection: UDPBroadcastConnection!
     var broadcastImagesConnection: UDPBroadcastConnection!
+    var broadcastGPSConnection: UDPBroadcastConnection!
     
     var poseTimer = Timer()
     var imageTimer = Timer()
+    var GPSTimer = Timer()
     
     var isProcessingFrame = false
     var imageIndex = 0                 // this is the sequence number in the image stream
@@ -48,6 +50,10 @@ class DataStreamer: ObservableObject {
         broadcastImagesConnection = UDPBroadcastConnection(port: Config.Ports.broadcastImages, ip: INADDR_BROADCAST) {(port: Int, response: [UInt8]) -> Void in
             print("Received from \(INADDR_BROADCAST):\(port):\n\n\(response)")
         }
+        
+        broadcastGPSConnection = UDPBroadcastConnection(port: Config.Ports.broadcastGPS, ip: INADDR_BROADCAST) {(port: Int, response: [UInt8]) -> Void in
+            print("Received from \(INADDR_BROADCAST):\(port):\n\n\(response)")
+        }
     }
     
     /// Sends selected types of data to ROS when button is pressed
@@ -56,6 +62,7 @@ class DataStreamer: ObservableObject {
             print("Data stream started to IP \(ipAddressText)")
             poseTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.transmitPoseData), userInfo: nil, repeats: true)
             imageTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.transmitImages), userInfo: nil, repeats: true)
+            GPSTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.transmitGPS), userInfo: nil, repeats: true)
             isSendingData = true
         }
         else {
@@ -64,6 +71,10 @@ class DataStreamer: ObservableObject {
 
             imageTimer.invalidate()
             imageTimer = Timer()
+            
+            GPSTimer.invalidate()
+            GPSTimer = Timer()
+            
             isSendingData = false
         }
     }
@@ -71,6 +82,11 @@ class DataStreamer: ObservableObject {
     /// Sends the pose data to ROS
     @objc func transmitPoseData() {
         broadcastPoseConnection.sendBroadcast(arView.getCameraCoordinates())
+    }
+    
+    /// Sends the GPS data to ROS
+    @objc func transmitGPS() {
+        broadcastGPSConnection.sendBroadcast(arView.getGPSCoordinates())
     }
     
     /// Sends the camera frames to ROS
