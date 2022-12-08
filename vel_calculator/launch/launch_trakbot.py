@@ -19,6 +19,14 @@ def generate_launch_description():
                 {'port': 35602}
             ]
         ),
+        # Node(
+        #     package='arkit_data_streamer',
+        #     executable='gps_server',
+        #     name='gps_server',
+        #     parameters=[
+        #         {'port': 35603}
+        #     ]
+        # ),        
         Node(
             package='vel_calculator',
             executable='vel_calculator',

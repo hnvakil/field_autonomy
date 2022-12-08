@@ -1,3 +1,7 @@
+"""
+Launch file to start pose and image nodes
+"""
+
 from launch import LaunchDescription
 from launch_ros.actions import Node
 
@@ -20,5 +24,14 @@ def generate_launch_description():
             parameters=[
                 {'port': 35602}
             ]
-        )        
+        ),
+        Node(
+            package='arkit_data_streamer',
+            namespace='gps_server',
+            executable='gps_server',
+            name='gps',
+            parameters=[
+                {'port': 35603}
+            ]
+        )      
     ])
