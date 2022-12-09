@@ -1,3 +1,7 @@
+"""
+Node to record device pose in a CSV with visualization in RViz
+"""
+
 import rclpy
 from rclpy.node import Node
 from rclpy.duration import Duration
@@ -8,17 +12,21 @@ class OdometryRecorderNode(Node):
     def __init__(self):
         super().__init__('odometry_recorder')
 
+        # Track current marker number to increment
         self.marker_num = 0
 
+        # Create or wipe & open a new CSV
         self.odom_file = open("robot_path.csv", "w+")
         self.odom_file.write("x,y,z\n")
         self.odom_file.flush()
 
+        # Create publishers and subscribers
         self.create_subscription(PoseStamped, '/device_pose', self.record_point, 10)
-
         self.odom_marker_pub = self.create_publisher(Marker, '/odom_markers', 10)
     
     def record_point(self, pose):
+        """ Record device pose every time data is received """
+        # Create a ner marker
         marker = Marker()
         marker.header.frame_id = "odom"
         marker.header.stamp = pose.header.stamp
@@ -46,6 +54,7 @@ class OdometryRecorderNode(Node):
         self.marker_num += 1
         self.odom_marker_pub.publish(marker)
 
+        # Write device position to CSV
         self.odom_file.write(f"{pose.pose.position.x},{pose.pose.position.y},{pose.pose.position.z}\n")
         self.odom_file.flush()
 

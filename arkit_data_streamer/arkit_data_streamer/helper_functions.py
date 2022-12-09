@@ -1,3 +1,7 @@
+"""
+Helper functions for handling transforms
+"""
+
 from geometry_msgs.msg import TransformStamped
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
@@ -6,6 +10,7 @@ from rclpy.duration import Duration
 import PyKDL
 
 def convert_matrix_to_frame(transform_matrix):
+    """Converts a 3D transformation matrix into a PyKDL Frame object"""
     trans = PyKDL.Vector(transform_matrix[0,3], transform_matrix[1,3], transform_matrix[2,3])
     rot = PyKDL.Rotation(transform_matrix[0,0], transform_matrix[0,1], transform_matrix[0,2],
                          transform_matrix[1,0], transform_matrix[1,1], transform_matrix[1,2],
@@ -25,6 +30,8 @@ class TFHelper(object):
         self.transform_tolerance = Duration(seconds=0.08)    # tolerance for mismatch between scan and odom timestamp
 
     def send_transform(self, parent_frame, child_frame, pose, timestamp):
+        """ Creates and sends a TF message from a given child frame to a parent frame
+            given a pose and timestamp. """
         transform = TransformStamped()
         transform.header.stamp = timestamp
         transform.header.frame_id = parent_frame

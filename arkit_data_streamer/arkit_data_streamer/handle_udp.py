@@ -1,3 +1,8 @@
+"""
+Handle UDP connection for data stream
+Adapted from: https://github.com/occamLab/ARKit-Ros-Bridge
+"""
+
 import socket
 
 def extractUDP(udp_port):

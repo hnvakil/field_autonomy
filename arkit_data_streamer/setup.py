@@ -23,6 +23,7 @@ setup(
         'console_scripts': [
             'pose_server = arkit_data_streamer.pose_server:main',
             'image_server = arkit_data_streamer.image_server:main',
+            'gps_server = arkit_data_streamer.gps_server:main',
             'odometry_recorder = arkit_data_streamer.odometry_recorder:main'
         ],
     },

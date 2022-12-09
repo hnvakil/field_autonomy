@@ -13,7 +13,7 @@ import cv2
 import numpy as np
 
 
-model_path = "/home/kat/ros2_ws/src/field_autonomy/trail_finding/trail_finding/trail_model/trained_models/paper_10e.pth"
+model_path = "/home/ali1/paper_10e.pth"
 directions = ["LEFT", "CENTER", "RIGHT"]
 
 class FindTrail(Node):
@@ -34,7 +34,7 @@ class FindTrail(Node):
 
         self.pub = self.create_publisher(Direction, 'dir_msg', 10)
         
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device('cpu')
         self.transforms = transforms.Compose([transforms.Resize((101,101)),
                                      transforms.ToTensor(),
                                      transforms.Normalize(mean=[0.4914, 0.4822, 0.4465],
