@@ -1,2 +1,0 @@
-# ARKit to ROS2 Bridge
-This package along with the ARKitROS2Bridge app allow data to be streamed via UDP packets from an iOS device to another device on the same network or on a wired connection. Currently, the app broadcasts camera pose (from ARKit), live camera images, and GPS location.
