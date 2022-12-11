@@ -7,20 +7,22 @@ This package along with the ARKitROS2Bridge app allow data to be streamed via UD
 * iOS 16 device ('phone')
 
 # Install
-Clone the `field_autonomy` repository to both your PC and Mac.
+1. Clone the `field_autonomy` repository to both your PC and Mac.
+2. Open `ARKitROS2Bridge` in XCode. Change the Signing settings to your personal developer certificate. 
+3. Enable Developer Mode under Privacy & Security on your phone. 
+4. Build the app onto your phone. Allow camera and location permissions when prompted.
 
-Open `ARKitROS2Bridge` in XCode. Change the Signing settings to your personal developer certificate. Enable Developer Mode under Privacy & Security on your phone. Build the app onto your phone. Allow camera and location permissions when prompted.
-
-Build and source this package, `arkit_data_streamer` on your PC with
+5. Build and source this package, `arkit_data_streamer` on your PC with
 ```
 colcon build --symlink-install
 source install/setup.bash
 ```
 
 # Run
+## Choose Connection IP
 Because the data streamer communicates via UDP packets, the ARKitROS2Bridge app takes an IP address as an input to stream data to the correct location.
 
-## Wired Connection
+### Wired Connection
 **Note**: Your phone must have a SIM card and have mobile hotspot capability.
 
 Plug your phone into your PC. Open a terminal and run
@@ -50,16 +52,18 @@ inet [IP_ADDRESS]
 ```
 in the output.
 
-## Wireless Connection
-Make sure your phone and PC are connected to the same wireless network. Follow the same procedure as above in the wired connection section, except look for your wireless network name. It should begin with a `w` (`wlo1` in the example above). Find the ip address for the network.
+### Wireless Connection
+Make sure your phone and PC are connected to the same wireless network. Follow the same procedure as above in the wired connection section, except look for your wireless network name. It should begin with a `w` (`wlo1` in the example above). Find the ip address for the network with `ip a show`.
 
-## Wireless Access Point Connection
+### Wireless Access Point Connection
 If you setup your PC as a wireless access point (the field autonomy project uses a Raspberry Pi as an access point), you can connect your phone to the PC's network. The IP you will need is the router IP, found by navigating to the Wifi settings on the phone, opening the info for the access point, and scrolling down to the IP address listed next to "Router".
 
 ## Stream and Receive Data
-On the phone, open up the ARKitROS2Bridge app and type the IP address found in the previous sections into the field at the top, then hit return on the keyboard and the `Submit` button. The `Start Data Stream` button at the bottom should now be enabled. Press this button to start streaming data, and press again to stop.
+1. On the phone, open up the ARKitROS2Bridge app and type the IP address found in the previous sections into the field at the top.
+2. Hit return on the keyboard and the `Submit` button. The `Start Data Stream` button at the bottom should now be enabled. 
+3. Press `Start Data Stream` to start streaming data, and press again to stop.
 
-On the PC, run the following command:
+4. On the PC, run the following command:
 ```
 ros2 launch arkit_data_streamer launch_data_servers.py
 ```
