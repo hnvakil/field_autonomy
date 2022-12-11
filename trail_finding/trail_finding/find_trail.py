@@ -42,7 +42,7 @@ class FindTrail(Node):
                                      ])
 
         self.model = Net(3)
-        self.model.load_state_dict(torch.load(model_path))
+        self.model.load_state_dict(torch.load(model_path, map_location=self.device))
         self.model.eval()
 
         thread = Thread(target=self.loop_wrapper)
