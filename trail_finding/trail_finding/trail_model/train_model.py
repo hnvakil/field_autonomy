@@ -14,7 +14,7 @@ learning_rate = 0.001
 num_epochs = 10
 img_size = 101
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device("mps") # device = torch.device('mps' if torch.cuda.is_available() else 'cpu')
 
 all_transforms = transforms.Compose([transforms.Resize((img_size,img_size)),
                                      transforms.ToTensor(),
