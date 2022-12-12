@@ -78,7 +78,7 @@ It places markers in RViz2 at the phone position and generate a CSV with the mov
 
 # Code Architecture
 ## ARKitROS2Bridge App
-<img src="../media/arkitros2bridge.jpeg" width="293" height="633" alt="ARKitROS2Bridge app screenshot"/>
+![ARKitROS2Bridge app screenshot](../media/arkitros2bridge_app.jpeg)
 
 ### Files
 * `ARKitROS2BridgeApp.swift`
