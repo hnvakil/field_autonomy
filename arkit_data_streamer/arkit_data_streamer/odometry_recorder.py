@@ -3,6 +3,7 @@ Node to record device pose in a CSV with visualization in RViz
 """
 
 import rclpy
+import os
 from rclpy.node import Node
 from rclpy.duration import Duration
 from geometry_msgs.msg import PoseStamped
@@ -16,7 +17,7 @@ class OdometryRecorderNode(Node):
         self.marker_num = 0
 
         # Create or wipe & open a new CSV
-        self.odom_file = open("robot_path.csv", "w+")
+        self.odom_file = open(os.path.join(os.path.realpath(os.path.dirname(__file__)), "robot_path.csv"), "w+")
         self.odom_file.write("x,y,z\n")
         self.odom_file.flush()
 

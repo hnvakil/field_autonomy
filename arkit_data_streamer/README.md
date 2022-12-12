@@ -77,5 +77,76 @@ ros2 run arkit_data_streamer odometry_recorder
 It places markers in RViz2 at the phone position and generate a CSV with the movement path of the phone. The path can be visualized with the `plot_path.py` script. An RViz2 config file is also included in the package to visualize the phone pose.
 
 # Code Architecture
-## ARKitROS2 Bridge App
+## ARKitROS2Bridge App
+![ARKitROS2Bridge app screenshot](../media/arkitros2bridge_app.jpeg)
+
+### Files
+* `ARKitROS2BridgeApp.swift`
+    * App delegate
+* `ContentView.swift`
+    * Contains UI elements (AR camera view, IP address field, data streaming start/stop)
+* `ARViewController.swift`
+    * Contains ARViewController class
+    * Controller for the AR session
+    * Handles GPS location updates
+    * Notable functions:
+        * `getGPSCoordinates()`: Returns GPS coordinates with timestamp, formatted as a String
+        * `getVideoFrames()`: Returns current AR session frame as a UIImage with a timestamp
+        * `getCameraCoordinates()`: Returns position and orientation of the camera as a 4x4 transformation matrix with a timestamp, formatted as a String
+        * `getCameraIntrinsics()`: Returns camera intrinsic data formatted as a String and converted into bytes
+* `DataStreamer.swift`:
+    * Contains DataStreamer class
+    * Handles conversion of ARKit information to UDP data packets
+    * Functions:
+        * `setupUdpConnections()`: Creates UDP connections using ports from Config and IP address inputted in the app
+        * `startButtonTapped()`: Starts/stops timers to transmit data every 0.1s
+        * `transmitPoseData()`, `transmitGPS()`: Broadcast UDP packets containing the corresponding information
+        * `transmitImages()`: Scale down and compress images for processing speed. Split images into smaller packets and broadcast one at a time.
+* `UDPBroadcastConnection.swift`:
+    * Contains UDPBroadcastConnection class
+    * Setup connections and broadcast UDP packets to given ports on a given address
+* `Config.swift`: 
+    * Store port numbers for each data type
+
 ## arkit_data_streamer Package
+### System Architecture
+![ARKit ROS system diagram](../media/arkit_ros_system_diagram_1.jpg)
+
+![ARKit ROS data stream system diagram](../media/arkit_ros_system_diagram_2.jpg)
+
+### Nodes
+* `pose_server.py`
+    * Contains PoseServerNode
+    * Receives & processes phone pose UDP packets sent by the app
+    * Calculates offset between phone timestamp and ROS time
+    * Publishes pose as msg type PoseStamped to topic `/device_pose`
+    * Publishes iOS-ROS time offset as msg type Float64 to topic `/ios_clock`
+    * Publishes a transform from device frame to odom frame to topic `/tf`
+* `image_server.py`
+    * Contains ImageServerNode
+    * Receives & processes image & camera intrinsics UDP packets sent by the app
+    * Subscribes to `/ios_clock`
+    * Publishes images as msg type CompressedImage to topic `/camera/image_raw/compressed`
+    * Publishes camera intrinsics as msg type CameraInfo to topic `/camera/camera_info`
+* `gps_server.py`
+    * Contains GPSServerNode
+    * Receives & processes GPS coordinate UDP packets sent by the app
+    * Subcribes to `/ios_clock`
+    * Publishes coordinates and timestamp as msg type Float64MultiArray to `/gps_coords`
+* `odometry_recorder.py`
+    * Contains OdometryRecorderNode
+    * Subscribes to `/device_pose`
+    * Publishes markers at device positions as msg type Marker to topic `/odom_markers`
+    * Writes device positions to a CSV file called `robot_path.csv` in the same directory as the node. Will overwrite previous path file by default.
+
+### Additional Files
+* `handle_udp.py`
+    * Contains `extractUDP(udp_port)`
+    * Continuously reads and returns data from UDP packets from the given port
+* `helper_functions.py`
+    * Contains `convert_matrix_to_frame(transform_matrix)` and `TFHelper`
+    * `TFHelper` is used to publish to the `/tf` topic
+* `plot_path.py`
+    * Script to plot path recorded in `robot_path.csv` by the odometry_recorder node
+* `launch_data_servers.py`
+    * Launch file to create all 3 data server nodes at once
