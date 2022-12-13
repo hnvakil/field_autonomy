@@ -20,13 +20,12 @@
 					<h1 id="logo"><a href="index.html">TrakBot <span> -- Allison, Han, Jeremy, Kate</span></a></h1>
 					<nav id="nav">
 						<ul>
-							<li class="current"><a href="index.html">Home</a></li>
 							<li class="submenu">
 								<a href="#">Menu</a>
 								<ul>
+									<li class="current"><a href="index.html">Main Page</a></li>
 									<li><a href="left-sidebar.html">Ethics Statement</a></li>
 									<li><a href="right-sidebar.html">System Overview</a></li>
-									<li><a href="no-sidebar.html">Team Goals</a></li>
 								</ul>
 							</li>
 						</ul>
@@ -79,7 +78,7 @@
 											smartphone running an AR app, and ROS2. Our hope was to design a system which 
 											enabled our vehicle to autonomously navigate forest trails using machine learning.
 										</p>
-										<a href="#" class="button">Project Outcomes</a>
+										<a href="#cta" class="button">Project Status</a>
 
 									</section>
 
@@ -93,7 +92,7 @@
 										<p>We chose this project as it had a large systems component which aligned well with our team's individual learning goals. 
 											We were also excited about working in a non-controlled environment (outdoors) and moving beyond the less-variable locations
 											and Neatos that we had worked with in prior projects.</p>
-											<a href="#" class="button">Team Learning Goals</a>
+											<a href="https://github.com/hnvakil/field_autonomy/blob/main/README.md" class="button">Team Learning Goals</a>
 
 									</section>
 
@@ -122,8 +121,41 @@
 				<section id="cta">
 
 					<header>
-						<h2>Final Outcomes</h2>
+						<h2>Project Status</h2>
 					</header>
+					<div class="row">
+						<div class="col-4 col-12-narrower">
+							<section>
+								<video width="225" height="400" controls>
+									<source src="images/successvid.mp4" type="video/mp4">
+								  Your browser does not support the video tag.
+								  </video> 
+							</section>	
+						</div>	
+						<div class="col-8 col-12-narrower">
+
+							<section>
+
+								<p>Currently, we have sucessfully integrated all of the components of our system, 
+								and have run two field tests with our vehicle. This video shows a sucessful run 
+								of the system - in which the robot navigates along a trail until it starts drifting,
+								and then corrects its path to better follow the trail. While the system worked in some 
+								cases, there are still many improvements that we believe would be valuable to implement. 
+								Our control model, which given the output weights of the machine learning model and determines 
+								the tread velocities, could be improved to better guide the robot. We also could make 
+								better use of our visual odometry to introduce more thorough path planning.
+					
+								<br/>
+
+								</p>
+								<a href="#right-sidebar.html" class="button">Read More</a>
+
+
+							</section>	
+						</div>	
+					</div>	
+
+
 					<footer>
 					</footer>
 
