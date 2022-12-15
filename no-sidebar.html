@@ -25,7 +25,7 @@
 							<ul>
 								<li class="current"><a href="index.html">Main Page</a></li>
 								<li><a href="left-sidebar.html">Ethics Statement</a></li>
-								<li><a href="right-sidebar.html">System Overview</a></li>
+								<li><a href="no-sidebar.html">System Overview</a></li>
 							</ul>
 						</li>
 					</ul>
@@ -41,77 +41,57 @@
 					</header>
 
 					<!-- One -->
-						<section class="wrapper style4 container">
+					<section class="wrapper style4 container">
 
-							<!-- Content -->
-								<div class="content">
-									<header>
-										<h3>High Level Overview</h3>
-									</header>
-									<div class="row">
-										<div class="col-6 col-12-narrower">
-											<a href="#" class="image featured"><img src="images/trakbot_software_system_diagram.jpg" alt="System Diagram" /></a>
-										</div>	
-										<div class="col-6 col-12-narrower">
-											<section>
-									
-												<p>In this section, overview of what the whole thing is... words words words</p>
-											</section>
-										</div>
-									</div>	
-								</div>
-
-						</section>
-
-					<!-- Two -->
-						<section class="wrapper style1 container">
-							<header class="special">
-								<span class="icon solid fa-eye"></span>
-								<h3>Software Systems</h3>
-							</header>
-							<section class="wrapper style1 container">
+						<!-- Content -->
+							<div class="content">
+								<header>
+									<h3>High Level Overview</h3>
+								</header>
 								<div class="row">
 									<div class="col-6 col-12-narrower">
-										
-										<section>
-											<header>
-												<h3>Swift Interface</h3>
-											</header>
-											<p>Sed tristique purus vitae volutpat ultrices. Aliquam eu elit eget arcu commodo suscipit dolor nec nibh. Proin a ullamcorper elit, et sagittis turpis. Integer ut fermentum.</p>
-											<footer>
-												<ul class="buttons">
-													<li><a href="#" class="button small">Learn More</a></li>
-												</ul>
-											</footer>
-										</section>
-
-									</div>
+										<a href="#" class="image featured"><img src="images/trakbot_software_system_diagram.jpg" alt="System Diagram" /></a>
+									</div>	
 									<div class="col-6 col-12-narrower">
-
 										<section>
-											<header>
-												<h3>Machine Learning</h3>
-											</header>
-											<p>Sed tristique purus vitae volutpat ultrices. Aliquam eu elit eget arcu commodo suscipit dolor nec nibh. Proin a ullamcorper elit, et sagittis turpis. Integer ut fermentum.</p>
-											<footer>
-												<ul class="buttons">
-													<li><a href="#" class="button small">Learn More</a></li>
-												</ul>
-											</footer>
+											<p>
+												Our system consists of a CyberKAT, a kit robot from Spyker Workshop, a Raspberry Pi, an Arduino Uno, 
+												an iOS device, and a laptop with ROS2 Foxy installed. By default, CyberKAT is operated with a remote 
+												control communicating with a receiver on the robot, which then signals two electronic speed controllers 
+												(ESCs) through the onboard PCB to change the motor speeds. We wired in an Arduino Uno between the receiver 
+												and ESCs, allowing manual joystick control to still be available, and connected a Pi to the Arduino so 
+												that they can communicate over Serial. The iOS device communicates wirelessly with the computer to send 
+												live odometry data and video feed, which the computer processes and uses to command the Pi.
+											</p>
 										</section>
-
 									</div>
 								</div>	
-						</section>
+							</div>
+
+					</section>
+					<!-- Two -->
+					<section class="wrapper style1 container">
+						<header class="special">
+							<span class="icon solid fa-eye"></span>
+							<h3>Software Systems</h3>
+						</header>
 						<section class="wrapper style1 container">
 							<div class="row">
 								<div class="col-6 col-12-narrower">
-
+									
 									<section>
 										<header>
-											<h3>ROS Architecture</h3>
+											<h3>Swift Interface</h3>
 										</header>
-										<p>Sed tristique purus vitae volutpat ultrices. Aliquam eu elit eget arcu commodo suscipit dolor nec nibh. Proin a ullamcorper elit, et sagittis turpis. Integer ut fermentum.</p>
+										<p>
+											The ARKitROS2Bridge app is programmed in Swift using SwiftUI for the interface and ARKit for the backend. 
+											The interface allows the user to see the live camera stream, input the IP address for wireless connection 
+											between the phone and computer, and start and stop the data stream. The app pulls the camera pose data 
+											(4x4 transform containing position and orientation) and the camera frames from ARKit, and pulls the phone’s 
+											GPS coordinates from the CoreLocation library. The app then broadcasts each of these as UDP packets to different 
+											ports on the given IP. Due to the size of each camera frame, they are split into multiple packets prior to being 
+											broadcast.
+										</p>
 										<footer>
 											<ul class="buttons">
 												<li><a href="#" class="button small">Learn More</a></li>
@@ -122,6 +102,54 @@
 								</div>
 								<div class="col-6 col-12-narrower">
 
+									<section>
+										<header>
+											<h3>Machine Learning</h3>
+										</header>
+										<p>Sed tristique purus vitae volutpat ultrices. Aliquam eu elit eget arcu commodo suscipit dolor nec nibh. Proin a ullamcorper elit, et sagittis turpis. Integer ut fermentum.</p>
+										<footer>
+											<ul class="buttons">
+												<li><a href="#" class="button small">Learn More</a></li>
+											</ul>
+										</footer>
+									</section>
+
+								</div>
+							</div>	
+						</section>
+						<section class="wrapper style1 container">
+							<div class="row">
+								<div class="col-6 col-12-narrower">
+									<section>
+										<header>
+											<h3>ROS Architecture</h3>
+										</header>
+										<p>
+											The overall ROS architecture is summarized in the system diagram at the top of the page. Each type of UDP packet 
+											sent by the ARKitROS2BRidge app is received by a different ROS node functioning as a server. These nodes are 
+											<b>pose_server</b>, <b>image_server</b>, and <b>gps_server</b>. The pose data is converted to ROS coordinate frame and published as 
+											a PoseStamped to the topic <b>/device_pose</b>. The camera images are stitched back together and published as a CompressedImage 
+											to topic <b>/camera/image_raw/compressed</b>. The GPS data is published as a custom message type called CoordinateStamped to 
+											the topic <b>/gps_coords</b>. 
+										</p>
+										<p>
+											The <b>odometry_recorder</b> node subscribes to the <b>/device_pose</b> topic to place markers in RViz at the current location 
+											of the device as well as generate a CSV with the robot path. <b>find_trail</b> is the node that runs our trail detection 
+											ML model. It subscribes to <b>/camera/image_raw/compressed</b>, runs each camera frame through the model, retrieves weights 
+											for whether to classify the image as left, right, or center of a trail, and publishes a message of custom type 
+											Direction to <b>/dir_msg</b>. This is read by the <b>vel_calculator</b> node, which contains the controls logic for the robot and 
+											determines a linear and angular velocity to publish as type Twist to <b>/cmd_vel</b>. The node <b>tread_writer</b> runs on the Pi 
+											and subscribes to <b>/cmd_vel</b>, then sends an appropriate message over Serial to the Arduino.
+										</p>
+										<footer>
+											<ul class="buttons">
+												<li><a href="#" class="button small">Learn More</a></li>
+											</ul>
+										</footer>
+									</section>
+								</div>
+							
+								<div class="col-6 col-12-narrower">
 									<section>
 										<header>
 											<h3>Arduino Control</h3>
@@ -133,57 +161,69 @@
 											</ul>
 										</footer>
 									</section>
-
 								</div>
 							</div>
 						</section>
+					</section>
+					<!-- Three -->
+					<section class="wrapper style1 container">
+	
+						<header class="special">
+							<span class="icon solid fa-eye"></span>
+							<h3>Mechanical and Electrical Hardware Systems</h3>
+						</header>
+						<section class="wrapper style1 container">
+							<div class="row">
+								<div class="col-6 col-12-narrower">
+									<section>
+										<header>
+											<h3>Hardware System Overview</h3>
+										</header>
+										<p>
+											Our hardware system consists of a remote control and receiver, a phone, a computer, a Raspberry Pi, an Arduino, 
+											two electronic speed controllers (ESCs), and two motors driving the robot's tank treads. The phone and computer
+											communicate wirelessly over IP, the computer and Pi communicate via ROS, and the Pi and Arduino communicate over Serial. 
+											The Arduino, receiver, ESCs, and motors are connected electrically.
+										</p>
+									</section>
+								</div>
+								<div class="col-6 col-12-narrower">
+									<a href="#" class="image featured"><img src="images/trakbot_hardware_system_diagram.jpg" alt="Hardware System Diagram" /></a>
+								</div>
+							</div>
 
+							<div class="row">
+								<section>
+									<header>
+										<h3>Raspberry Pi Configuration</h3>
+									</header>
+									<p>The raspberry pi 4 we used for this project is running ubuntu server 20.04. It is normally running in a command line only or “headless” state to save computational resources but can be run with a gnome desktop interface if desired. The Pi is configured with a static ethernet IP to make sshing into the system easy. From there we are able to initialize our own access point known as the “TrakBot” network. Once this network is created, we are able to wirelessly run our ROS2 system on both the pi and a student laptop.
+									</p>
+								</section>
+							</div>
+
+							<div class="row">
+								<section>
+									<header>
+										<h3>Camera Hardware</h3>
+									</header>
+									<p>Because our machine learning database was a set of images taken at the full height of an adult we wanted to get our camera to a higher elevation to give us the best chance of success. Because our camera is an iphone we are able to use any array of phone mounts for this system. We created a wooden platform with several locating points for the phone mount then used a combination of painters tape and hot glue to secure it to the robot without permanently damaging it. Unfortunately, when we tested the robot in sub freezing temperatures and the robot experienced a large force tilting back, the hot glue failed and the phone mount fell. Fortunately, the robot and computational hardware was undamaged.</p>
+								</section>
+							</div>
+
+							<div class="row">
+								<section>
+									<header>
+										<h3>Mechanical Challenges</h3>
+									</header>
+									<p>Our TrakBot faced a few mechanical problems while field testing. Our biggest issue was the left main drive gear. The shaft on the motor was not slotted perfectly flat which resulted in the set screw of the gear actually pushing it off rather than retaining the gear on the shaft. We were able to minimize this issue by using loctite on the shaft to act as an adhesive agent. This did not solve the problem but it allowed us to test for longer durations without having to stop and reset the gear. 
+										<br/>Another mechanical issue we ran into was losing one of the treads on the robot. While driving in grass, a tread completely detached from the drive assembly. This is a common flaw in treaded vehicles and often is a result of a lack of proper tension on the tread. We were able to reinstall the tread and increase the tension on both sides resulting in a more secure and slightly more quiet robot. 
+									</p>
+								</section>
+							</div>
+						</section>
+					</section>
 				</article>
-
-<!-- Two -->
-<section class="wrapper style1 container">
-	<header class="special">
-		<span class="icon solid fa-eye"></span>
-		<h3>Mechanical and Electrical Hardware Systems</h3>
-	</header>
-	<section class="wrapper style1 container">
-				
-				<section>
-					<header>
-						<h3>Raspberry Pi Configuration</h3>
-					</header>
-					<p>The raspberry pi 4 we used for this project is running ubuntu server 20.04. It is normally running in a command line only or “headless” state to save computational resources but can be run with a gnome desktop interface if desired. The Pi is configured with a static ethernet IP to make sshing into the system easy. From there we are able to initialize our own access point known as the “TrakBot” network. Once this network is created, we are able to wirelessly run our ROS2 system on both the pi and a student laptop.
-					</p>
-
-				</section>
-
-
-
-				<section>
-					<header>
-						<h3>Camera Hardware</h3>
-					</header>
-					<p>Because our machine learning database was a set of images taken at the full height of an adult we wanted to get our camera to a higher elevation to give us the best chance of success. Because our camera is an iphone we are able to use any array of phone mounts for this system. We created a wooden platform with several locating points for the phone mount then used a combination of painters tape and hot glue to secure it to the robot without permanently damaging it. Unfortunately, when we tested the robot in sub freezing temperatures and the robot experienced a large force tilting back, the hot glue failed and the phone mount fell. Fortunately, the robot and computational hardware was undamaged.</p>
-
-				</section>
-
-
-				<section>
-					<header>
-						<h3>Mechanical Challenges</h3>
-					</header>
-					<p>Our TrakBot faced a few mechanical problems while field testing. Our biggest issue was the left main drive gear. The shaft on the motor was not slotted perfectly flat which resulted in the set screw of the gear actually pushing it off rather than retaining the gear on the shaft. We were able to minimize this issue by using loctite on the shaft to act as an adhesive agent. This did not solve the problem but it allowed us to test for longer durations without having to stop and reset the gear. 
-						<br/>Another mechanical issue we ran into was losing one of the treads on the robot. While driving in grass, a tread completely detached from the drive assembly. This is a common flaw in treaded vehicles and often is a result of a lack of proper tension on the tread. We were able to reinstall the tread and increase the tension on both sides resulting in a more secure and slightly more quiet robot. 
-					</p>
-
-				</section>
-
-	</section>
-</section>
-
-</article>
-
-
 
 				<!-- Footer -->
 				<footer id="footer">
@@ -201,7 +241,6 @@
 					</ul>
 
 				</footer>
-
 		</div>
 
 		<!-- Scripts -->
