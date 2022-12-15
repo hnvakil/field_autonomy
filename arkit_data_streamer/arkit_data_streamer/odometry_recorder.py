@@ -8,6 +8,7 @@ from rclpy.node import Node
 from rclpy.duration import Duration
 from geometry_msgs.msg import PoseStamped
 from visualization_msgs.msg import Marker
+from gps_interfaces.msg import CoordinateStamped
 
 class OdometryRecorderNode(Node):
     def __init__(self):
@@ -20,9 +21,13 @@ class OdometryRecorderNode(Node):
         self.odom_file = open(os.path.join(os.path.realpath(os.path.dirname(__file__)), "robot_path.csv"), "w+")
         self.odom_file.write("x,y,z\n")
         self.odom_file.flush()
+        self.gps_file = open(os.path.join(os.path.realpath(os.path.dirname(__file__)), "robot_gps.csv"), "w+")
+        self.gps_file.write("x,y,z\n")
+        self.gps_file.flush()
 
         # Create publishers and subscribers
         self.create_subscription(PoseStamped, '/device_pose', self.record_point, 10)
+        self.create_subscription(CoordinateStamped, '/gps_coords', self.record_gps_pos, 10)
         self.odom_marker_pub = self.create_publisher(Marker, '/odom_markers', 10)
     
     def record_point(self, pose):
@@ -58,6 +63,11 @@ class OdometryRecorderNode(Node):
         # Write device position to CSV
         self.odom_file.write(f"{pose.pose.position.x},{pose.pose.position.y},{pose.pose.position.z}\n")
         self.odom_file.flush()
+
+    def record_gps_pos(self, coords):
+        """ Record device GPS position every time data is received """
+        self.gps_file.write(f"{coords.latitude},{coords.longitude}\n")
+        self.gps_file.flush()
 
 def main():
     rclpy.init()
