@@ -4,11 +4,11 @@ from PIL import Image
 import torchvision.transforms as transforms
 
 
-img_path = "/home/kat/ros2_ws/src/field_autonomy/trail_finding/trail_finding/trail_model/test_imgs/trail_1.jpg"
+img_path = "/home/kat/ros2_ws/src/field_autonomy/trail_finding/trail_finding/trail_model/data/009/009/videos/rc/26802465.frames/frame4.jpg"
 img_resize = 101
-model_path = "/home/kat/ros2_ws/src/field_autonomy/trail_finding/trail_finding/trail_model/trained_models/paper_10e.pth"
+model_path = "/home/kat/ros2_ws/src/field_autonomy/trail_finding/trail_finding/trail_model/10e_halfdata.pth"
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cpu')
 img = Image.open(img_path)
 
 all_transforms = transforms.Compose([transforms.Resize((img_resize,img_resize)),
@@ -18,7 +18,8 @@ all_transforms = transforms.Compose([transforms.Resize((img_resize,img_resize)),
                                      ])
 
 model = Net(3)
-model.load_state_dict(torch.load(model_path))
+
+model.load_state_dict(torch.load(model_path, map_location=device))
 model.eval()
 
 def predict_image(image):
