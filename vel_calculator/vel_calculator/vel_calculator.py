@@ -79,9 +79,9 @@ class CalculateVel(Node):
             if self.center_weight > self.center_thresh:
                 linear_vel = self.lin_def
             elif self.left_weight > self.right_weight:
-                angular_vel = self.ang_def
-            else:
                 angular_vel = -1*self.ang_def
+            else:
+                angular_vel = self.ang_def
 
             # angular_vel = min(ANGMULT*(self.right_weight - self.left_weight), MAXSPEED)
             # angular_vel = max(angular_vel, -1*MAXSPEED)

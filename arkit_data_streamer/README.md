@@ -132,7 +132,7 @@ It places markers in RViz2 at the phone position and generate a CSV with the mov
     * Contains GPSServerNode
     * Receives & processes GPS coordinate UDP packets sent by the app
     * Subcribes to `/ios_clock`
-    * Publishes coordinates and timestamp as msg type Float64MultiArray to `/gps_coords`
+    * Publishes coordinates and timestamp as msg type CoordinateStamped (custom, included in `gps_interfaces` in the `field_autonomy` repo) to `/gps_coords`
 * `odometry_recorder.py`
     * Contains OdometryRecorderNode
     * Subscribes to `/device_pose`
