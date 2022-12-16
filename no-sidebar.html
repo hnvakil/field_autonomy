@@ -154,7 +154,37 @@
 										<header>
 											<h3>Arduino Control</h3>
 										</header>
-										<p>Sed tristique purus vitae volutpat ultrices. Aliquam eu elit eget arcu commodo suscipit dolor nec nibh. Proin a ullamcorper elit, et sagittis turpis. Integer ut fermentum.</p>
+										<p>
+											The Arduino functioned as a finite state machine with three different states: passive, remote control, and serial control. The body loop
+											of the arduino code would begin by checking which state it should be in, determined by the position of the left stick on the remote control.
+											Different positions would send different PWM frequencies to the remote control receiver, which would send those frequencies to one of the Arduino's
+											digital input pins. The beginning of the arduino's loop would determine that input frequency, and set the state accordingly.
+										</p>
+										<p>
+											The first state was "passive". The arduino would enter this state if the left stick was down, or the controller was off. Passive mode actively wrote
+											speeds of 0 to the treads, meaning that no matter what input was going into the arduino from anywhere else, TrakBot wouldn't move. This was useful 
+											for both safety and testing. It meant TrakBot wouldn't move when we didn't expect it to, important given its size, noise, and speed, and functioned as
+											an emergency stop. This came in handy when the loss of a gear and resulting loss of control caused TrakBot to almost run into one of our instructors.
+										</p>
+										<p>
+											The second state was "remote control". The arduino would enter this state if the left stick was in the middle of its range. Remote control mode meant the
+											Arduino would listen to the PWM frequencies sent in by the remote control's right stick (the one used for driving TrakBot before our modifications), and 
+											drive Trakbot accordingly. This was useful for getting TrakBot into position for testing, as teleop control was difficult to do precisely. This also
+											functioned as a useful troubleshooting method. We had enough interconnected systems that any number of things could go wrong, so switching TrakBot to remote
+											control mode let us identify if the error was at/below the Arduino level (e.g. esc's not on, no power to arduino, etc) or above (e.g. serial communication 
+											error). This mode functioned entirely separately from anything higher in the systems stack.
+										</p>
+										<p>
+											The third and final state was "serial control". The arduino would enter this state if the left stick was at the top of its range. Serial control mode meant
+											the Arduino would listen to input over the serial port in the form of "[linear velocity],[angular velocity]" with start and end markers. This mode was how 
+											the raspberry pi would communicate with the Arduino, and therefore how our entire system would activate the treads and make TrakBot move. When the Arduino
+											entered this mode, it would activate an LED to make its status visibly obvious to an observer.
+										</p>
+										<p>
+											Once the mode was selected, the arduino would parse the input (for serial and remote control) to get the desired linear and angular speeds. It would then 
+											calculate the speeds each tread must spin at to achieve that speed, and calculate the appropriate PWM signal to send to each ESC to achieve that speed. Finally,
+											it would write those speeds and TrakBot would move!
+										</p>
 										<footer>
 											<ul class="buttons">
 												<li><a href="#" class="button small">Learn More</a></li>
