@@ -106,7 +106,15 @@
 										<header>
 											<h3>Machine Learning</h3>
 										</header>
-										<p>Sed tristique purus vitae volutpat ultrices. Aliquam eu elit eget arcu commodo suscipit dolor nec nibh. Proin a ullamcorper elit, et sagittis turpis. Integer ut fermentum.</p>
+										<p>Our machine learning algorithm is designed using <a href="">this paper</a>. We trained our model using the dataset 
+											collected by the paper's author's as well. The model architecture is a DNN classifyer that 
+											takes in images from our camera feed and classifies the location of the as one of three categories - left, right, or center. 
+											Then, using the output weights for each category, we calculate the linear and angular velocity that the robot should travel at. 
+											Due to time contraints, the model that we are using in our demo videos
+											is only trained on a tenth of the data using 10 epochs, which results in a much less reliable model. One issue that 
+											we ran into when into when testing our system was that the model is most likely to predict a trail as leadin to the 
+											right, which means that our vehicle then frequently turns to the right when it shouldn't. 
+									</p>
 										<footer>
 											<ul class="buttons">
 												<li><a href="#" class="button small">Learn More</a></li>
