@@ -1,5 +1,5 @@
 # field_autonomy
-Comprobo final project: getting a robot to drive autonomously in the field
+An autonomous trail-following robot. Final project for A Computational Introduction to Robotics, Fall 2022.
 
 # proposal
 What is the main idea of the project?
