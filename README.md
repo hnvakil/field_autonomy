@@ -8,6 +8,8 @@ We set out to retrofit an existing remote controlled vehicle into an autonomous 
 Primary documentation of this project can be found on [our website](https://hnvakil.github.io/field_autonomy/index.html).
 
 # Code
+* Setup.md
+ * Contains setup instructions for starting an access point on the Raspberry Pi
 * ARKitROS2Bridge
   * iOS app to upload phone pose, camera stream, and GPS location from ARKit wirelessly
 * arduino
