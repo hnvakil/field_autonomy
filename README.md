@@ -1,34 +1,30 @@
 # field_autonomy
 An autonomous trail-following robot. Final project for A Computational Introduction to Robotics, Fall 2022.
 
-# proposal
-What is the main idea of the project?
-* We are going to retrofit an existing remote controlled vehicle into an autonomous outdoor vehicle using a system consisting of an Arduino, Raspberry Pi, smartphone running an AR app, and ROS2.
+# Project Goal
+We set out to retrofit an existing remote controlled vehicle into an autonomous outdoor navigation system using an Arduino, Raspberry Pi, smartphone running an AR app, and ROS2. Our hope was to design a system which enabled our vehicle to autonomously navigate forest trails using machine learning.
 
-Provide some motivation for your project. Why does your team want to pursue this? What possible applications does the project have? Given our discussions in class, are there possible implications for society? (Note: We’re not expecting a lengthy analysis, but some ideas and consideration.)
-* We think that this is cool and is a good systems project which aligns with our learning goals. We are also excited about working in a non-controlled environment (outdoors) and moving beyond using Neatos in the mac. Any autonomous vehicle has potential impact for harm - both in if it is poorly implemented and if it is used in a manner that has high potential for harm. We are thus choosing to pursue this while in college as an experiment where the consequences are lower.
+# Documentation
+Primary documentation of this project can be found on [our website](https://hnvakil.github.io/field_autonomy/index.html).
 
-How are you planning to engage with the Ethics and Responsible Use Statement part of the project?
-* We will plan to write a guidelines of use statement for our project to clarify our intent as creaters. While this is not a perfect solution, we believe that it will help us consider the ethical implications.
+# Code
+* ARKitROS2Bridge
+  * iOS app to upload phone pose, camera stream, and GPS location from ARKit wirelessly
+* arduino
+  * Arduino scripts to read commands over Serial and output PWM signals to motors
+  * Contains arduino_ros ROS2 package with TreadWriter node, which communicates with Arduino over Serial
+* arkit_data_streamer
+  * ROS2 package to receive data from ARKitROS2Bridge app
+  * Package contains separate README for install and run instructions
+* trail_finding
+  * ROS2 package to run trail identification ML model
+* vel_calculator
+  * ROS2 package containing node to command linear and angular velocity based on results of trail finding algorithm
+* direction_interfaces
+  * Contains custom ROS2 message type Direction
+* gps_interfaces
+  * Contains custom ROS2 message CoordinateStamped
 
-What topics will you explore and what will you generate? What frameworks / algorithms are you planning to explore (do your best to answer this even if things are still fuzzy)? What is your MVP? What are your stretch goals?
-* We will explore field autonomy, using computer vision as well as IMU and GPS to navigate, and systems work - connecting Arduino, phone, RasPi, and robot. Frameworks and algorithms - we plan to implement fiducial tracking and learn about optical flow. Our MVP is controlling the robot with ROS teleop and having a live camera feed. Our stretch goal is to autonomously navigate parcel B. 
-
-Outline a rough timeline for the major milestones of your project. This will mainly be useful to refer back to as we move through the project.
-* Week 1 - We have investigated each piece of the pipeline in order to identify major barriars to getting teleop working. Stretch goal is working teleop.
-* Week 2 - Investigate ARkit/ARcore. Work on moving past barriers to teleop
-* Week 3 - Implement ARkit/ARcore solution heavily leaning on tutorials. Have working teleop.
-* Weeks 4 and 5 - Triage for what we sucessfully did not finish in our original plan.
-
-What do you view as the biggest risks to you being successful on this project?
-* System integration - there are so many pieces that we have to juggle that if one of them fails we will likely struggle a lot.
-
-Given each of your YOGAs, in what ways is this project well-aligned with these goals, and in what ways is it misaligned? If there are ways in which it is not well-aligned, please provide a potential strategy for bringing the project and your learning goals into better alignment. There should be an individual section for each person on the team addressing the fit between the YOGA and the project topic.
-
-* Kate: This project has a lot of potential to align with my goals. To some extent I will need to understand how the whole system works but I hope to figure out how to abstract out what I need to know about each component. The system is definitely not already prescribed in how we design it so this well aligns with my goals. My only concern is finishing the project, but I feel like that's something we are going to put a lot of attention to so that is okay.
-
-* Jeremy: The alignment with my goals is rather straightforward, we are building a ground up system with complete integration which will result in us having to figure out a lot of the basic architecture that has previously been built for us. A part of this ground up build will be finding a way to carefully implement a safety system that will stop our rather fast robot when we lose control of it... something that is a usefull skill to have practice in when moving into industry. 
-
-* Han: This project aligns with my goals quite well. We have a robotic platform to build off of, which will enable us to quickly test components and hopefully have the robot functional before long. Our development plan has numerous components to synthesize, and I have a theoretical understanding of how the components work. I'm a little nervous about working with such a large group, but we've discussed task tracking and I think the group will work well together.
-
-* Allison: This project is well aligned with my goals because I would like to gain experience with robot systems and we have a very involved system. I also wanted to improve project management skills, and with the scope of our project and number of team members there will definitely be opportunities to work on these skills. I will also make an effort to gain more theoretical knowledge about visual odometry, even if we don't implement it on the robot platform.
+# TODOs
+* Complete install/run instructions for overall project
+* Complete requirements.txt
