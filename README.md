@@ -9,7 +9,7 @@ Primary documentation of this project can be found on [our website](https://hnva
 
 # Code
 * Setup.md
- * Contains setup instructions for starting an access point on the Raspberry Pi
+  * Contains setup instructions for starting an access point on the Raspberry Pi
 * ARKitROS2Bridge
   * iOS app to upload phone pose, camera stream, and GPS location from ARKit wirelessly
 * arduino
