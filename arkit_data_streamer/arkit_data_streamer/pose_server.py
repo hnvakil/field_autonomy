@@ -17,7 +17,7 @@ class PoseServerNode(Node):
         super().__init__('pose_server')
         
         # Get port from ROS params
-        self.declare_parameter('port')
+        self.declare_parameter('port', 35601)
         self.port = self.get_parameter('port').value
 
         # Declare variables to store device pose

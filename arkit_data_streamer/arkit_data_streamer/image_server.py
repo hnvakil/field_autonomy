@@ -17,7 +17,7 @@ class ImageServerNode(Node):
         super().__init__('image_server')
 
         # Get port from ROS params
-        self.declare_parameter('port')
+        self.declare_parameter('port', 35602)
         self.port = self.get_parameter('port').value
 
         # Declare variables

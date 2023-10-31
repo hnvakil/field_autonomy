@@ -9,7 +9,6 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='arkit_data_streamer',
-            namespace='pose_server',
             executable='pose_server',
             name='pose_server',
             parameters=[
@@ -18,7 +17,6 @@ def generate_launch_description():
         ),
         Node(
             package='arkit_data_streamer',
-            namespace='image_server',
             executable='image_server',
             name='image_server',
             parameters=[
@@ -27,7 +25,6 @@ def generate_launch_description():
         ),
         Node(
             package='arkit_data_streamer',
-            namespace='gps_server',
             executable='gps_server',
             name='gps_server',
             parameters=[

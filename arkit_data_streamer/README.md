@@ -2,7 +2,7 @@
 This package along with the ARKitROS2Bridge app allow data to be streamed via UDP packets from an iOS device to another device on the same network or on a wired connection. Currently, the app broadcasts camera pose (from ARKit), live camera images, and GPS location.
 
 # Requirements
-* Device with ROS2 Foxy ('PC')
+* Device with ROS2 Foxy or Humble ('PC')
 * MacOS device with XCode 14 ('Mac')
 * iOS 16 device ('phone')
 
@@ -75,6 +75,16 @@ Custom nodes can be written to access any of these topics. Included in this pack
 ros2 run arkit_data_streamer odometry_recorder
 ```
 It places markers in RViz2 at the phone position and generate a CSV with the movement path of the phone. The path can be visualized with the `plot_path.py` script. An RViz2 config file is also included in the package to visualize the phone pose.
+
+## Troubleshooting
+If you get an error related to image transport like the following when trying to view the image in RQT:
+```
+Unable to load plugin for transport image_transport_compressed_sub
+```
+Install image-transport-plugins from apt.
+```
+sudo apt install ros-${ROS_DISTRO}-image-transport-plugins
+```
 
 # Code Architecture
 ## ARKitROS2Bridge App

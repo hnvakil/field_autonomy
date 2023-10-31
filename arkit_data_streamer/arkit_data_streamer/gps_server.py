@@ -14,7 +14,7 @@ class GPSServerNode(Node):
         super().__init__('gps_server')
         
         # Get port from ROS params
-        self.declare_parameter('port')
+        self.declare_parameter('port', 35603)
         self.port = self.get_parameter('port').value
 
         # Declare variables to store GPS coordinates
